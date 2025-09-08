@@ -14,9 +14,14 @@
         <q-btn color="primary" flat label="Nuevo registro" @click="newRecord" />
       </template>
       <template v-slot:body-cell-actions="props">
-        <q-btn color="primary" flat label="Ver" @click="viewRecord(props.row)" />
-        <q-btn color="secondary" flat label="Editar" class="q-ml-sm" @click="editRecord(props.row)" />
-        <q-btn color="negative" flat label="Eliminar" class="q-ml-sm" @click="deleteRecord(props.row)" />
+        <q-btn color="secondary" flat label="Editar" @click="editRecord(props.row)" />
+        <q-btn
+          color="negative"
+          flat
+          label="Eliminar"
+          class="q-ml-sm"
+          @click="confirmDelete(props.row)"
+        />
       </template>
     </q-table>
   </q-page>
@@ -25,9 +30,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 const router = useRouter()
 const route = useRoute()
+const $q = useQuasar()
 const patientId = Number(route.query.id)
 
 const records = ref([])
@@ -51,12 +58,19 @@ function newRecord () {
   router.push({ path: '/registro', query: { patientId, mode: 'new' } })
 }
 
-function viewRecord (record) {
-  router.push({ path: '/registro', query: { patientId, recordId: record.id, mode: 'view' } })
-}
-
 function editRecord (record) {
   router.push({ path: '/registro', query: { patientId, recordId: record.id, mode: 'edit' } })
+}
+
+function confirmDelete (record) {
+  $q.dialog({
+    title: 'Confirmar',
+    message: '¿Está seguro de eliminar este registro?',
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    deleteRecord(record)
+  })
 }
 
 function deleteRecord (record) {
@@ -64,13 +78,6 @@ function deleteRecord (record) {
   const patient = patients.find(p => p.id === patientId)
   if (patient) {
     patient.records = patient.records.filter(r => r.id !== record.id)
-    if (patient.records.length === 0) {
-      const idx = patients.findIndex(p => p.id === patientId)
-      patients.splice(idx, 1)
-      localStorage.setItem('patients', JSON.stringify(patients))
-      router.push('/pacientes')
-      return
-    }
     localStorage.setItem('patients', JSON.stringify(patients))
     records.value = patient.records
   }

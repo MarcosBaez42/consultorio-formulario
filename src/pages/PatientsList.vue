@@ -12,7 +12,13 @@
     <q-table :rows="patients" :columns="columns" row-key="id" class="full-width">
       <template v-slot:body-cell-actions="props">
         <q-btn color="primary" flat label="Ver" @click="viewPatient(props.row)" />
-        <q-btn color="secondary" flat label="Editar" class="q-ml-sm" @click="editPatient(props.row)" />
+        <q-btn
+          color="negative"
+          flat
+          label="Eliminar"
+          class="q-ml-sm"
+          @click="confirmDelete(props.row)"
+        />
       </template>
     </q-table>
   </q-page>
@@ -21,10 +27,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 defineOptions({ name: 'PatientsList' })
 
 const router = useRouter()
+const $q = useQuasar()
 const patients = ref([])
 
 const columns = [
@@ -53,8 +61,24 @@ function viewPatient (patient) {
   router.push({ path: '/historial', query: { id: patient.id } })
 }
 
-function editPatient (patient) {
-  const latest = patient.records[patient.records.length - 1]
-  router.push({ path: '/registro', query: { patientId: patient.id, recordId: latest.id, mode: 'edit' } })
+function confirmDelete (patient) {
+  $q.dialog({
+    title: 'Confirmar',
+    message: '¿Está seguro de eliminar este paciente?',
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    deletePatient(patient)
+  })
+}
+
+function deletePatient (patient) {
+  const stored = JSON.parse(localStorage.getItem('patients') || '[]')
+  const idx = stored.findIndex(p => p.id === patient.id)
+  if (idx !== -1) {
+    stored.splice(idx, 1)
+    localStorage.setItem('patients', JSON.stringify(stored))
+    patients.value = patients.value.filter(p => p.id !== patient.id)
+  }
 }
 </script>
