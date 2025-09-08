@@ -20,7 +20,7 @@
           flat
           label="Eliminar"
           class="q-ml-sm"
-          @click="confirmDelete(props.row)"
+          @click="confirmDelete(props.row.id)"
         />
       </template>
     </q-table>
@@ -35,7 +35,7 @@ import { useQuasar } from 'quasar'
 const router = useRouter()
 const route = useRoute()
 const $q = useQuasar()
-const patientId = Number(route.query.id)
+const patientId = route.query.id ? String(route.query.id) : null
 
 const records = ref([])
 
@@ -62,22 +62,22 @@ function editRecord (record) {
   router.push({ path: '/registro', query: { patientId, recordId: record.id, mode: 'edit' } })
 }
 
-function confirmDelete (record) {
+function confirmDelete (id) {
   $q.dialog({
     title: 'Confirmar',
     message: '¿Está seguro de eliminar este registro?',
     cancel: true,
     persistent: true
   }).onOk(() => {
-    deleteRecord(record)
+    deleteRecord(id)
   })
 }
 
-function deleteRecord (record) {
+function deleteRecord (id) {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
   const patient = patients.find(p => p.id === patientId)
   if (patient) {
-    patient.records = patient.records.filter(r => r.id !== record.id)
+    patient.records = patient.records.filter(r => r.id !== id)
     localStorage.setItem('patients', JSON.stringify(patients))
     records.value = patient.records
   }

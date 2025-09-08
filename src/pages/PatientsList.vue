@@ -17,7 +17,7 @@
           flat
           label="Eliminar"
           class="q-ml-sm"
-          @click="confirmDelete(props.row)"
+          @click="confirmDelete(props.row.id)"
         />
       </template>
     </q-table>
@@ -61,24 +61,24 @@ function viewPatient (patient) {
   router.push({ path: '/historial', query: { id: patient.id } })
 }
 
-function confirmDelete (patient) {
+function confirmDelete (id) {
   $q.dialog({
     title: 'Confirmar',
     message: '¿Está seguro de eliminar este paciente?',
     cancel: true,
     persistent: true
   }).onOk(() => {
-    deletePatient(patient)
+    deletePatient(id)
   })
 }
 
-function deletePatient (patient) {
+function deletePatient (id) {
   const stored = JSON.parse(localStorage.getItem('patients') || '[]')
-  const idx = stored.findIndex(p => p.id === patient.id)
+  const idx = stored.findIndex(p => p.id === id)
   if (idx !== -1) {
     stored.splice(idx, 1)
     localStorage.setItem('patients', JSON.stringify(stored))
-    patients.value = patients.value.filter(p => p.id !== patient.id)
+    patients.value = patients.value.filter(p => p.id !== id)
   }
 }
 </script>

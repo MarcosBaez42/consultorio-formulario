@@ -332,8 +332,8 @@ const router = useRouter();
 const route = useRoute();
 const mode = computed(() => route.query.mode || 'create')
 const isViewMode = computed(() => mode.value === 'view')
-const patientId = computed(() => route.query.patientId ? Number(route.query.patientId) : null)
-const recordId = computed(() => route.query.recordId ? Number(route.query.recordId) : null)
+const patientId = computed(() => route.query.patientId ? String(route.query.patientId) : null)
+const recordId = computed(() => route.query.recordId ? String(route.query.recordId) : null)
 
 const formData = ref({
   // 1. Datos de Identificación
@@ -573,12 +573,12 @@ const onSubmit = () => {
           patient.records[idx] = { id: recordId.value, ...JSON.parse(JSON.stringify(formData.value)) }
         }
       } else {
-        patient.records.push({ id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) })
+        patient.records.push({ id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) })
       }
     }
   } else {
-    const newRecord = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) }
-    const newPatient = { id: Date.now(), records: [newRecord] }
+    const newRecord = { id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) }
+    const newPatient = { id: crypto.randomUUID(), records: [newRecord] }
     patients.push(newPatient)
   }
   localStorage.setItem('patients', JSON.stringify(patients))
