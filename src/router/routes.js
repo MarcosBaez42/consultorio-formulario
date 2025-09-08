@@ -1,9 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import routes from './routes';
+import MedicalForm from '../pages/MedicalForm.vue'
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
+const routes = [
+  { path: '/', component: MedicalForm }
+]
 
-export default router;
+export default routes
