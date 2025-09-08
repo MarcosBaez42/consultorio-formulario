@@ -14,7 +14,7 @@
           expand-separator
           icon="fas fa-address-card"
           label="1. Datos de Identificación"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           default-opened
           class="rounded-borders shadow-2"
         >
@@ -64,7 +64,7 @@
           expand-separator
           icon="fas fa-notes-medical"
           label="2. Motivo de Consulta y Antecedentes"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -91,7 +91,7 @@
           expand-separator
           icon="fas fa-user-check"
           label="3. Evaluaciones Estéticas (Facial y Corporal)"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -120,7 +120,18 @@
                   <q-input outlined v-model="formData.evaluacionCorporal.talla" label="Talla (cm)" type="number" class="col-4" />
                   <q-input outlined v-model="formData.evaluacionCorporal.imc" label="IMC" type="number" class="col-4" readonly />
               </div>
-              <q-input outlined v-model="formData.evaluacionCorporal.circunferencias" label="Circunferencias (cintura, cadera, muslos, brazos)" />
+              <q-file
+                v-model="formData.evaluacionCorporal.analisisInBody"
+                label="Análisis InBody (subir fotos)"
+                outlined
+                multiple
+                accept="image/*"
+                counter
+              >
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
             </q-card-section>
           </q-card>
         </q-expansion-item>
@@ -130,7 +141,7 @@
           expand-separator
           icon="fas fa-heart-pulse"
           label="4. Estilo de Vida"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -150,7 +161,7 @@
           expand-separator
           icon="fas fa-ruler-combined"
           label="5. Escalas de Evaluación"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -214,7 +225,7 @@
           expand-separator
           icon="fas fa-microscope"
           label="6. Análisis Avanzados (Impedanciometría y Cleopatra)"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -240,7 +251,6 @@
               <q-input outlined v-model="formData.cleopatra.manchas" label="Presencia de manchas (cantidad y profundidad)" />
               <q-input outlined v-model="formData.cleopatra.arrugas" label="Detección de arrugas finas y profundas" />
               <q-input outlined v-model="formData.cleopatra.evaluacionZonas" label="Evaluación por zonas: frente / mejillas / mentón / nariz" />
-              <!-- Aquí se podría añadir un componente para subir imágenes -->
               <q-file outlined v-model="formData.cleopatra.fotoAntes" label="Foto comparativa (Antes)" class="col-12 col-md-6"/>
               <q-file outlined v-model="formData.cleopatra.fotoDespues" label="Foto comparativa (Después)" class="col-12 col-md-6"/>
             </q-card-section>
@@ -252,7 +262,7 @@
           expand-separator
           icon="fas fa-clipboard-list"
           label="7. Diagnóstico y Plan de Tratamiento"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
@@ -276,18 +286,29 @@
           expand-separator
           icon="fas fa-file-signature"
           label="8. Consentimientos y Firmas"
-          header-class="text-h6 text-primary bg-blue-1"
+          header-class="text-h6 text-primary bg-blue-1 non-truncated-header"
           class="rounded-borders shadow-2"
         >
           <q-card>
             <q-card-section class="q-pa-md">
               <q-checkbox v-model="formData.consentimientos.firmados" label="Se entregan y firman los consentimientos correspondientes a los procedimientos acordados." />
-              <div class="row q-mt-xl q-col-gutter-xl text-center">
+              <div class="row q-mt-xl q-col-gutter-xl items-end">
                   <div class="col-12 col-md-6">
-                      <div class="signature-line"></div>
-                      <div class="text-subtitle2">Firma del paciente</div>
+                      <q-file
+                        v-model="formData.firmas.paciente"
+                        label="Subir firma del paciente"
+                        outlined
+                        accept="image/*"
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="signature" />
+                        </template>
+                      </q-file>
+                      <div class="signature-line q-mt-sm"></div>
+                      <div class="text-subtitle2 text-center">Firma del paciente</div>
                   </div>
-                  <div class="col-12 col-md-6">
+                  <div class="col-12 col-md-6 text-center">
+                      <img :src="formData.firmas.tratante" alt="Firma del tratante" style="max-height: 100px; max-width: 100%;"/>
                       <div class="signature-line"></div>
                       <div class="text-subtitle2">Firma del profesional tratante</div>
                   </div>
@@ -306,7 +327,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar();
@@ -362,7 +383,7 @@ const formData = ref({
     peso: null,
     talla: null,
     imc: null,
-    circunferencias: '',
+    analisisInBody: null, // Changed from 'circunferencias'
   },
 
   // 6. Estilo de Vida
@@ -425,9 +446,16 @@ const formData = ref({
     indicaciones: '',
   },
 
-  // Consentimientos
+  // Consentimientos y Firmas
   consentimientos: {
     firmados: false
+  },
+  firmas: {
+    paciente: null,
+    // IMPORTANTE: Reemplaza esta URL con la ruta a la imagen de la firma del profesional
+    // Puede ser una ruta local (ej. '/signatures/doctor-signature.png') si está en tu carpeta /public
+    // O una URL completa si está alojada en otro lugar.
+    tratante: 'https://placehold.co/250x100/000000/FFFFFF?text=Firma+Doctor&font=script'
   }
 
 });
@@ -482,11 +510,17 @@ const onSubmit = () => {
 <style scoped>
 .signature-line {
     border-bottom: 2px solid #616161;
-    height: 40px;
+    height: 1px;
     margin-bottom: 8px;
 }
 .rounded-borders {
   border-radius: 8px;
   overflow: hidden; /* Important for child elements to respect the border radius */
+}
+
+/* This class prevents the expansion item label from being truncated */
+.non-truncated-header :deep(.q-item__label) {
+  white-space: normal;
+  line-height: 1.2 !important;
 }
 </style>
