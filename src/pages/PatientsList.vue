@@ -1,41 +1,37 @@
 <template>
   <q-page padding>
+    <q-btn
+      label="Volver al inicio"
+      icon="home"
+      color="primary"
+      flat
+      class="q-mb-md"
+      @click="router.push('/')"
+    />
     <div class="text-h5 q-mb-md">Pacientes Registrados</div>
-    <q-table :rows="patients" :columns="columns" row-key="id">
+    <q-table :rows="patients" :columns="columns" row-key="id" class="full-width">
       <template v-slot:body-cell-actions="props">
         <q-btn color="primary" flat label="Ver" @click="viewPatient(props.row)" />
+        <q-btn color="secondary" flat label="Editar" class="q-ml-sm" @click="editPatient(props.row)" />
       </template>
     </q-table>
-    <q-dialog v-model="dialog">
-      <q-card style="width:700px;max-width:90vw;">
-        <q-card-section>
-          <div class="text-h6">Detalles del Paciente</div>
-        </q-card-section>
-        <q-card-section style="max-height:70vh" class="scroll">
-          <pre>{{ JSON.stringify(selectedPatient, null, 2) }}</pre>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Cerrar" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'PatientsList' })
 
+const router = useRouter()
 const patients = ref([])
-const dialog = ref(false)
-const selectedPatient = ref(null)
 
 const columns = [
-  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left' },
-  { name: 'edad', label: 'Edad', field: 'edad', align: 'left' },
-  { name: 'documento', label: 'Documento', field: 'documento', align: 'left' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'right' }
+  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 30%' },
+  { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 15%' },
+  { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 25%' },
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center', style: 'width: 30%' }
 ]
 
 onMounted(() => {
@@ -43,7 +39,10 @@ onMounted(() => {
 })
 
 function viewPatient (patient) {
-  selectedPatient.value = patient
-  dialog.value = true
+  router.push({ path: '/registro', query: { id: patient.id, mode: 'view' } })
+}
+
+function editPatient (patient) {
+  router.push({ path: '/registro', query: { id: patient.id, mode: 'edit' } })
 }
 </script>

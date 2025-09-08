@@ -2,12 +2,21 @@
   <q-page padding class="flex flex-center bg-grey-2">
     <div class="q-pa-md" style="width: 100%; max-width: 900px;">
 
+      <q-btn
+        label="Volver al inicio"
+        icon="home"
+        color="primary"
+        flat
+        class="q-mb-md"
+        @click="router.push('/')"
+      />
+
       <div class="text-h4 text-center text-primary q-mb-md">Ficha de Paciente - Estética Médica</div>
       <p class="text-subtitle1 text-center text-grey-7 q-mb-lg">
         Formulario de ingreso y seguimiento para nuevos pacientes.
       </p>
 
-      <q-form @submit.prevent="onSubmit" class="q-gutter-y-lg">
+      <q-form @submit.prevent="onSubmit" class="q-gutter-y-lg" :class="{ 'read-only-form': isViewMode }">
 
         <!-- 1. Datos de Identificación -->
         <q-expansion-item
@@ -317,8 +326,8 @@
           </q-card>
         </q-expansion-item>
 
-        <div class="row justify-end q-mt-xl">
-           <q-btn label="Guardar Ficha" type="submit" color="primary" icon="save" size="lg"/>
+        <div class="row justify-end q-mt-xl" v-if="!isViewMode">
+           <q-btn label="Guardar Paciente" type="submit" color="primary" icon="save" size="lg"/>
         </div>
 
       </q-form>
@@ -327,12 +336,16 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const $q = useQuasar();
 const router = useRouter();
+const route = useRoute();
+
+const isViewMode = computed(() => route.query.mode === 'view');
+const patientId = computed(() => route.query.id ? Number(route.query.id) : null);
 
 const formData = ref({
   // 1. Datos de Identificación
@@ -462,6 +475,16 @@ const formData = ref({
 
 });
 
+onMounted(() => {
+  if (patientId.value) {
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const existing = patients.find(p => p.id === patientId.value);
+    if (existing) {
+      formData.value = JSON.parse(JSON.stringify(existing));
+    }
+  }
+});
+
 // Calcula el IMC automáticamente
 watch(() => [formData.value.evaluacionCorporal.peso, formData.value.evaluacionCorporal.talla], ([peso, talla]) => {
     if (peso > 0 && talla > 0) {
@@ -498,8 +521,15 @@ const fotoenvejecimientoOptions = [
 
 const onSubmit = () => {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
-    const newPatient = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) };
-    patients.push(newPatient);
+    if (patientId.value) {
+        const idx = patients.findIndex(p => p.id === patientId.value);
+        if (idx !== -1) {
+            patients[idx] = { id: patientId.value, ...JSON.parse(JSON.stringify(formData.value)) };
+        }
+    } else {
+        const newPatient = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) };
+        patients.push(newPatient);
+    }
     localStorage.setItem('patients', JSON.stringify(patients));
     $q.notify({
         color: 'positive',
@@ -527,5 +557,9 @@ const onSubmit = () => {
 .non-truncated-header :deep(.q-item__label) {
   white-space: normal;
   line-height: 1.2 !important;
+}
+
+.read-only-form {
+  pointer-events: none;
 }
 </style>
