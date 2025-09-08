@@ -130,7 +130,7 @@
                   <q-input outlined v-model="formData.evaluacionCorporal.imc" label="IMC" type="number" class="col-4" readonly />
               </div>
               <q-file
-                v-model="formData.evaluacionCorporal.analisisInBody"
+                v-model="formData.evaluacionCorporal.analisisInBodyFiles"
                 label="Análisis InBody (subir fotos)"
                 outlined
                 multiple
@@ -260,8 +260,8 @@
               <q-input outlined v-model="formData.cleopatra.manchas" label="Presencia de manchas (cantidad y profundidad)" />
               <q-input outlined v-model="formData.cleopatra.arrugas" label="Detección de arrugas finas y profundas" />
               <q-input outlined v-model="formData.cleopatra.evaluacionZonas" label="Evaluación por zonas: frente / mejillas / mentón / nariz" />
-              <q-file outlined v-model="formData.cleopatra.fotoAntes" label="Foto comparativa (Antes)" class="col-12 col-md-6"/>
-              <q-file outlined v-model="formData.cleopatra.fotoDespues" label="Foto comparativa (Después)" class="col-12 col-md-6"/>
+               <q-file outlined v-model="formData.cleopatra.fotoAntesFile" label="Foto comparativa (Antes)" class="col-12 col-md-6"/>
+              <q-file outlined v-model="formData.cleopatra.fotoDespuesFile" label="Foto comparativa (Después)" class="col-12 col-md-6"/>
             </q-card-section>
           </q-card>
         </q-expansion-item>
@@ -304,7 +304,7 @@
               <div class="row q-mt-xl q-col-gutter-xl items-end">
                   <div class="col-12 col-md-6">
                       <q-file
-                        v-model="formData.firmas.paciente"
+                        v-model="formData.firmas.pacienteFile"
                         label="Subir firma del paciente"
                         outlined
                         accept="image/*"
@@ -398,7 +398,8 @@ const formData = ref({
     peso: null,
     talla: null,
     imc: null,
-    analisisInBody: null, // Changed from 'circunferencias'
+    analisisInBody: [], // paths to uploaded images
+    analisisInBodyFiles: [],
   },
 
   // 6. Estilo de Vida
@@ -446,6 +447,8 @@ const formData = ref({
     evaluacionZonas: '',
     fotoAntes: null,
     fotoDespues: null,
+    fotoAntesFile: null,
+    fotoDespuesFile: null,
   },
   
   // Diagnóstico y Plan
@@ -467,6 +470,7 @@ const formData = ref({
   },
   firmas: {
     paciente: null,
+    pacienteFile: null,
     // IMPORTANTE: Reemplaza esta URL con la ruta a la imagen de la firma del profesional
     // Puede ser una ruta local (ej. '/signatures/doctor-signature.png') si está en tu carpeta /public
     // O una URL completa si está alojada en otro lugar.
@@ -518,6 +522,49 @@ const fotoenvejecimientoOptions = [
     { label: 'Grado 3', value: 3, description: 'Arrugas profundas, flacidez, discromías marcadas' },
     { label: 'Grado 4', value: 4, description: 'Fotoenvejecimiento severo, piel muy delgada y flácida' }
 ];
+
+const uploadImage = async (file) => {
+  const data = new FormData();
+  data.append('image', file);
+  const res = await fetch('http://localhost:3000/upload', {
+    method: 'POST',
+    body: data
+  });
+  const json = await res.json();
+  return json.path;
+};
+
+watch(() => formData.value.firmas.pacienteFile, async (file) => {
+  if (file && file instanceof File) {
+    formData.value.firmas.paciente = await uploadImage(file);
+    formData.value.firmas.pacienteFile = null;
+  }
+});
+
+watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
+  if (file && file instanceof File) {
+    formData.value.cleopatra.fotoAntes = await uploadImage(file);
+    formData.value.cleopatra.fotoAntesFile = null;
+  }
+});
+
+watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
+  if (file && file instanceof File) {
+    formData.value.cleopatra.fotoDespues = await uploadImage(file);
+    formData.value.cleopatra.fotoDespuesFile = null;
+  }
+});
+
+watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files) => {
+  if (Array.isArray(files) && files.length && files[0] instanceof File) {
+    const paths = [];
+    for (const f of files) {
+      paths.push(await uploadImage(f));
+    }
+    formData.value.evaluacionCorporal.analisisInBody = paths;
+    formData.value.evaluacionCorporal.analisisInBodyFiles = [];
+  }
+});
 
 const onSubmit = () => {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
