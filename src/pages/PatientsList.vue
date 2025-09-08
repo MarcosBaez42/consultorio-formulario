@@ -35,14 +35,26 @@ const columns = [
 ]
 
 onMounted(() => {
-  patients.value = JSON.parse(localStorage.getItem('patients') || '[]')
+  const stored = JSON.parse(localStorage.getItem('patients') || '[]')
+  patients.value = stored.map(p => {
+    const records = p.records || []
+    const latest = records[records.length - 1] || {}
+    return {
+      id: p.id,
+      nombreCompleto: latest.nombreCompleto,
+      edad: latest.edad,
+      documento: latest.documento,
+      records
+    }
+  })
 })
 
 function viewPatient (patient) {
-  router.push({ path: '/registro', query: { id: patient.id, mode: 'view' } })
+  router.push({ path: '/historial', query: { id: patient.id } })
 }
 
 function editPatient (patient) {
-  router.push({ path: '/registro', query: { id: patient.id, mode: 'edit' } })
+  const latest = patient.records[patient.records.length - 1]
+  router.push({ path: '/registro', query: { patientId: patient.id, recordId: latest.id, mode: 'edit' } })
 }
 </script>

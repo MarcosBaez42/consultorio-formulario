@@ -330,9 +330,10 @@ import { useRouter, useRoute } from 'vue-router'
 const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
-
-const isViewMode = computed(() => route.query.mode === 'view');
-const patientId = computed(() => route.query.id ? Number(route.query.id) : null);
+const mode = computed(() => route.query.mode || 'create')
+const isViewMode = computed(() => mode.value === 'view')
+const patientId = computed(() => route.query.patientId ? Number(route.query.patientId) : null)
+const recordId = computed(() => route.query.recordId ? Number(route.query.recordId) : null)
 
 const formData = ref({
   // 1. Datos de Identificación
@@ -468,13 +469,21 @@ const formData = ref({
 
 onMounted(() => {
   if (patientId.value) {
-    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
-    const existing = patients.find(p => p.id === patientId.value);
-    if (existing) {
-      formData.value = JSON.parse(JSON.stringify(existing));
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]')
+    const patient = patients.find(p => p.id === patientId.value)
+    if (patient && patient.records) {
+      let record
+      if (recordId.value) {
+        record = patient.records.find(r => r.id === recordId.value)
+      } else {
+        record = patient.records[patient.records.length - 1]
+      }
+      if (record) {
+        formData.value = JSON.parse(JSON.stringify(record))
+      }
     }
   }
-});
+})
 
 // Calcula el IMC automáticamente
 watch(() => [formData.value.evaluacionCorporal.peso, formData.value.evaluacionCorporal.talla], ([peso, talla]) => {
@@ -554,25 +563,37 @@ watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files)
 });
 
 const onSubmit = () => {
-  const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+  const patients = JSON.parse(localStorage.getItem('patients') || '[]')
   if (patientId.value) {
-    const idx = patients.findIndex(p => p.id === patientId.value);
-    if (idx !== -1) {
-      patients[idx] = { id: patientId.value, ...JSON.parse(JSON.stringify(formData.value)) };
+    const patient = patients.find(p => p.id === patientId.value)
+    if (patient) {
+      if (recordId.value && mode.value === 'edit') {
+        const idx = patient.records.findIndex(r => r.id === recordId.value)
+        if (idx !== -1) {
+          patient.records[idx] = { id: recordId.value, ...JSON.parse(JSON.stringify(formData.value)) }
+        }
+      } else {
+        patient.records.push({ id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) })
+      }
     }
   } else {
-    const newPatient = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) };
-    patients.push(newPatient);
+    const newRecord = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) }
+    const newPatient = { id: Date.now(), records: [newRecord] }
+    patients.push(newPatient)
   }
-  localStorage.setItem('patients', JSON.stringify(patients));
+  localStorage.setItem('patients', JSON.stringify(patients))
   $q.notify({
     color: 'positive',
     textColor: 'white',
     icon: 'check_circle',
     message: 'Ficha del paciente guardada correctamente'
-  });
-  router.push('/pacientes');
-};
+  })
+  if (patientId.value) {
+    router.push({ path: '/historial', query: { id: patientId.value } })
+  } else {
+    router.push('/pacientes')
+  }
+}
 
 </script>
 
