@@ -329,8 +329,10 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 
 const $q = useQuasar();
+const router = useRouter();
 
 const formData = ref({
   // 1. Datos de Identificación
@@ -495,14 +497,17 @@ const fotoenvejecimientoOptions = [
 ];
 
 const onSubmit = () => {
-    // Aquí iría la lógica para enviar los datos a un backend/API
-    console.log('Formulario enviado:', formData.value);
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const newPatient = { id: Date.now(), ...JSON.parse(JSON.stringify(formData.value)) };
+    patients.push(newPatient);
+    localStorage.setItem('patients', JSON.stringify(patients));
     $q.notify({
         color: 'positive',
         textColor: 'white',
         icon: 'check_circle',
         message: 'Ficha del paciente guardada correctamente'
     });
+    router.push('/pacientes');
 };
 
 </script>
