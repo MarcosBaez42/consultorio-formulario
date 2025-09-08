@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { Quasar, Notify } from 'quasar'
+import { Quasar, Notify, Dialog } from 'quasar'
 
 // Import icon libraries
 import '@quasar/extras/material-icons/material-icons.css'
@@ -19,8 +19,9 @@ const myApp = createApp(App)
 
 myApp.use(Quasar, {
   plugins: {
-    Notify // Agrega el plugin de Notificaciones para que funcione en tu formulario
-  }, 
+    Notify, // Agrega el plugin de Notificaciones para que funcione en tu formulario
+    Dialog
+  },
 })
 
 // Usa el router en tu aplicación
