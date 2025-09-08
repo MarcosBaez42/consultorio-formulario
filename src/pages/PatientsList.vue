@@ -78,7 +78,10 @@ function deletePatient (id) {
   if (idx !== -1) {
     stored.splice(idx, 1)
     localStorage.setItem('patients', JSON.stringify(stored))
+    $q.notify({ type: 'positive', message: 'Paciente eliminado' })
     patients.value = patients.value.filter(p => p.id !== id)
+  } else {
+    $q.notify({ type: 'negative', message: 'Paciente no encontrado' })
   }
 }
 </script>

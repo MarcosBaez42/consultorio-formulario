@@ -77,9 +77,17 @@ function deleteRecord (id) {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
   const patient = patients.find(p => p.id === patientId)
   if (patient) {
-    patient.records = patient.records.filter(r => r.id !== id)
-    localStorage.setItem('patients', JSON.stringify(patients))
-    records.value = patient.records
+    const idx = patient.records.findIndex(r => r.id === id)
+    if (idx !== -1) {
+      patient.records.splice(idx, 1)
+      localStorage.setItem('patients', JSON.stringify(patients))
+      $q.notify({ type: 'positive', message: 'Registro eliminado' })
+      records.value = [...patient.records]
+    } else {
+      $q.notify({ type: 'negative', message: 'Registro no encontrado' })
+    }
+  } else {
+    $q.notify({ type: 'negative', message: 'Paciente no encontrado' })
   }
 }
 </script>
