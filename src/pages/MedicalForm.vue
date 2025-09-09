@@ -1,364 +1,822 @@
 <template>
   <q-page padding class="flex flex-center bg-grey-2">
     <div class="q-pa-md" style="width: 100%; max-width: 900px;">
+      <q-btn
+        label="Volver al inicio"
+        icon="home"
+        color="primary"
+        flat
+        class="q-mb-md"
+        @click="router.push('/')"
+      />
 
-      <q-btn label="Volver al inicio" icon="home" color="primary" flat class="q-mb-md" @click="router.push('/')" />
-
-      <div class="text-h4 text-center text-primary q-mb-md">Ficha de Paciente - Estética Médica</div>
+      <div class="text-h4 text-center text-primary q-mb-md">
+        Ficha de Paciente - Estética Médica
+      </div>
       <p class="text-subtitle1 text-center text-grey-7 q-mb-lg">
         Formulario de ingreso y seguimiento para nuevos pacientes.
       </p>
 
-      <q-form @submit.prevent="onSubmit" class="q-gutter-y-lg" :class="{ 'read-only-form': isViewMode }">
-
-        <!-- 1. Datos de Identificación -->
-        <q-expansion-item expand-separator icon="fas fa-address-card" label="1. Datos de Identificación"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" default-opened
-          class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md">
-              <div class="row q-col-gutter-md">
-                <q-input outlined v-model="formData.nombreCompleto" label="Nombre completo" class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.edad" label="Edad" type="number" class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.fechaNacimiento" mask="date" label="Fecha de nacimiento"
-                  class="col-12 col-md-6">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                        <q-date v-model="formData.fechaNacimiento">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-                <q-input outlined v-model="formData.documento" label="Documento de identidad" class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.telefono" label="Teléfono / Celular" class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.email" label="Correo electrónico" type="email"
-                  class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.ocupacion" label="Ocupación" class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.ciudadResidencia" label="Ciudad de residencia"
-                  class="col-12 col-md-6" />
-                <q-input outlined v-model="formData.fechaConsulta" mask="date" label="Fecha de la consulta"
-                  class="col-12">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                        <q-date v-model="formData.fechaConsulta">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 2. Motivo de Consulta y Antecedentes -->
-        <q-expansion-item expand-separator icon="fas fa-notes-medical" label="2. Motivo de Consulta y Antecedentes"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-md">
-              <div class="text-subtitle1 text-weight-bold">Motivo de Consulta Estética</div>
-              <q-input outlined v-model="formData.motivoConsulta.deseoMejora" type="textarea"
-                label="¿Qué desea mejorar?" />
-              <q-input outlined v-model="formData.motivoConsulta.expectativas" type="textarea"
-                label="Expectativas del tratamiento" />
-              <q-input outlined v-model="formData.motivoConsulta.tiempoCondicion"
-                label="Tiempo con la condición estética actual" />
-
-              <q-separator class="q-my-md" />
-
-              <div class="text-subtitle1 text-weight-bold">Antecedentes Médicos Relevantes</div>
-              <q-input outlined v-model="formData.antecedentes.enfermedades" type="textarea"
-                label="Enfermedades previas o actuales" />
-              <q-input outlined v-model="formData.antecedentes.cirugiasEsteticas" type="textarea"
-                label="Cirugías estéticas previas" />
-              <q-input outlined v-model="formData.antecedentes.alergias" type="textarea" label="Alergias conocidas" />
-              <q-input outlined v-model="formData.antecedentes.medicamentos" type="textarea"
-                label="Uso de medicamentos" />
-              <q-input outlined v-model="formData.antecedentes.tratamientosPrevios" type="textarea"
-                label="Tratamientos estéticos previos y resultados" />
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 3. Evaluaciones Estéticas -->
-        <q-expansion-item expand-separator icon="fas fa-user-check"
-          label="3. Evaluaciones Estéticas (Facial y Corporal)"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-md">
-              <div class="text-subtitle1 text-weight-bold">Evaluación Facial Estética</div>
-              <q-select outlined v-model="formData.evaluacionFacial.tipoPiel"
-                :options="['Seca', 'Grasa', 'Mixta', 'Sensible']" label="Tipo de piel" />
-              <q-input outlined v-model="formData.evaluacionFacial.lesionesActivas"
-                label="Lesiones activas (acné, rosácea, manchas, cicatrices)" />
-              <q-input outlined v-model="formData.evaluacionFacial.arrugas" label="Arrugas (ubicación y profundidad)" />
-              <q-input outlined v-model="formData.evaluacionFacial.laxitudCutanea" label="Laxitud cutánea" />
-              <q-input outlined v-model="formData.evaluacionFacial.hiperpigmentaciones" label="Hiperpigmentaciones" />
-              <q-input outlined v-model="formData.evaluacionFacial.flacidezMuscular" label="Flacidez muscular facial" />
-              <q-input outlined v-model="formData.evaluacionFacial.hidratacion" label="Hidratación y luminosidad" />
-              <q-input outlined v-model="formData.evaluacionFacial.simetria" label="Simetría facial y proporciones" />
-
-              <q-separator class="q-my-md" />
-
-              <div class="text-subtitle1 text-weight-bold">Evaluación Corporal Estética</div>
-              <q-input outlined v-model="formData.evaluacionCorporal.grasaLocalizada"
-                label="Zonas de grasa localizada" />
-              <q-input outlined v-model="formData.evaluacionCorporal.flacidezCutanea" label="Flacidez cutánea" />
-              <q-input outlined v-model="formData.evaluacionCorporal.celulitis" label="Celulitis (grado)" />
-              <q-input outlined v-model="formData.evaluacionCorporal.estrias" label="Estrías" />
-              <q-input outlined v-model="formData.evaluacionCorporal.tonicidadMuscular" label="Tonicidad muscular" />
-              <q-input outlined v-model="formData.evaluacionCorporal.retencionLiquidos"
-                label="Retención de líquidos o edemas" />
-              <div class="row q-col-gutter-sm">
-                <q-input outlined v-model="formData.evaluacionCorporal.peso" label="Peso (kg)" type="number"
-                  class="col-4" />
-                <q-input outlined v-model="formData.evaluacionCorporal.talla" label="Talla (cm)" type="number"
-                  class="col-4" />
-                <q-input outlined v-model="formData.evaluacionCorporal.imc" label="IMC" type="number" class="col-4"
-                  readonly />
-              </div>
-              <q-file v-model="formData.evaluacionCorporal.analisisInBodyFiles" label="Análisis InBody (subir fotos)"
-                outlined multiple accept="image/*" counter>
-                <template v-slot:prepend>
-                  <q-icon name="attach_file" />
-                </template>
-              </q-file>
-              <div class="row q-col-gutter-sm q-mt-sm">
-                <div v-for="(img, idx) in formData.evaluacionCorporal.analisisInBody" :key="idx" class="col-6 col-md-3 text-center">
-                  <q-img :src="img.url" alt="Análisis InBody" style="max-width: 100%; max-height: 100px;"
-                    @click="openViewer(img)" class="cursor-pointer" />
-                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 4. Estilo de Vida -->
-        <q-expansion-item expand-separator icon="fas fa-heart-pulse" label="4. Estilo de Vida"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-md">
-              <q-input outlined v-model="formData.estiloVida.alimentacion" label="Alimentación" />
-              <q-input outlined v-model="formData.estiloVida.hidratacion" label="Hidratación" />
-              <q-input outlined v-model="formData.estiloVida.actividadFisica" label="Actividad física" />
-              <q-input outlined v-model="formData.estiloVida.calidadSueno" label="Calidad del sueño" />
-              <q-input outlined v-model="formData.estiloVida.estres" label="Estrés percibido" />
-              <q-input outlined v-model="formData.estiloVida.tabaquismoAlcohol" label="Tabaquismo / alcohol" />
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 5. Escalas de Evaluación -->
-        <q-expansion-item expand-separator icon="fas fa-ruler-combined" label="5. Escalas de Evaluación"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-lg">
-              <q-option-group :options="glogauOptions" type="radio" v-model="formData.escalas.glogau"
-                label="Escala de Glogau (Envejecimiento)">
-                <template v-slot:label="opt">
-                  <div class="row items-center">
-                    <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
-                    <span>{{ opt.description }}</span>
-                  </div>
-                </template>
-              </q-option-group>
-              <q-separator />
-              <div class="text-subtitle1 text-weight-bold">Escala de Baumann (Tipo de Piel)</div>
-              <div class="row q-col-gutter-md">
-                <q-select class="col-6 col-md-3" outlined v-model="formData.escalas.baumann.humedad"
-                  :options="['Seca', 'Grasa']" label="Humedad" />
-                <q-select class="col-6 col-md-3" outlined v-model="formData.escalas.baumann.sensibilidad"
-                  :options="['Sensible', 'Resistente']" label="Sensibilidad" />
-                <q-select class="col-6 col-md-3" outlined v-model="formData.escalas.baumann.pigmentacion"
-                  :options="['Pigmentada', 'No Pigmentada']" label="Pigmentación" />
-                <q-select class="col-6 col-md-3" outlined v-model="formData.escalas.baumann.firmeza"
-                  :options="['Arrugada', 'Firme']" label="Firmeza" />
-              </div>
-              <q-input outlined v-model="formData.escalas.baumann.combinacion"
-                label="Combinación final del tipo de piel" />
-              <q-separator />
-              <q-option-group :options="fitzpatrickOptions" type="radio" v-model="formData.escalas.fitzpatrick"
-                label="Escala de Fitzpatrick (Fototipo)">
-                <template v-slot:label="opt">
-                  <div class="row items-center">
-                    <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
-                    <span>{{ opt.description }}</span>
-                  </div>
-                </template>
-              </q-option-group>
-              <q-separator />
-              <q-option-group :options="fotoenvejecimientoOptions" type="radio"
-                v-model="formData.escalas.fotoenvejecimiento" label="Escala de Fotoenvejecimiento (Daño Solar)">
-                <template v-slot:label="opt">
-                  <div class="row items-center">
-                    <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
-                    <span>{{ opt.description }}</span>
-                  </div>
-                </template>
-              </q-option-group>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 6. Análisis Avanzados -->
-        <q-expansion-item expand-separator icon="fas fa-microscope"
-          label="6. Análisis Avanzados (Impedanciometría y Cleopatra)"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-md">
-              <div class="text-subtitle1 text-weight-bold">Evaluación por Impedanciometría Corporal</div>
-              <div class="row q-col-gutter-sm">
-                <q-input outlined v-model="formData.impedanciometria.grasaCorporal" label="% de grasa corporal"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.impedanciometria.masaMuscular" label="Masa muscular"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.impedanciometria.masaOsea" label="Masa ósea"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.impedanciometria.aguaCorporal" label="Agua corporal total"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.impedanciometria.grasaVisceral" label="Índice de grasa visceral"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.impedanciometria.edadMetabolica" label="Edad metabólica"
-                  class="col-6 col-md-4" />
-              </div>
-              <q-separator class="q-my-md" />
-
-              <div class="text-subtitle1 text-weight-bold">Análisis Facial con Sistema Cleopatra</div>
-              <q-input outlined v-model="formData.cleopatra.resultadoGeneral" type="textarea"
-                label="Resultado del escaneo facial computarizado" />
-              <div class="row q-col-gutter-sm">
-                <q-input outlined v-model="formData.cleopatra.hidratacion" label="% de hidratación"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.cleopatra.elasticidad" label="% de elasticidad"
-                  class="col-6 col-md-4" />
-                <q-input outlined v-model="formData.cleopatra.poros" label="Poros (tamaño y cantidad)"
-                  class="col-12 col-md-4" />
-              </div>
-              <q-input outlined v-model="formData.cleopatra.manchas"
-                label="Presencia de manchas (cantidad y profundidad)" />
-              <q-input outlined v-model="formData.cleopatra.arrugas" label="Detección de arrugas finas y profundas" />
-              <q-input outlined v-model="formData.cleopatra.evaluacionZonas"
-                label="Evaluación por zonas: frente / mejillas / mentón / nariz" />
-              <q-file outlined v-model="formData.cleopatra.fotoAntesFiles" label="Foto comparativa (Antes)"
-                multiple counter accept="image/*">
-                <template v-slot:prepend>
-                  <q-icon name="attach_file" />
-                </template>
-              </q-file>
-              <div class="row q-col-gutter-sm q-mt-sm">
-                <div v-for="(img, idx) in formData.cleopatra.fotoAntes" :key="idx" class="col-6 col-md-3 text-center">
-                  <q-img :src="img.url" alt="Foto Antes" style="max-width: 100%; max-height: 100px;"
-                    @click="openViewer(img)" class="cursor-pointer" />
-                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
-                </div>
-              </div>
-              <q-file outlined v-model="formData.cleopatra.fotoDespuesFiles" label="Foto comparativa (Después)"
-                multiple counter accept="image/*" class="q-mt-md">
-                <template v-slot:prepend>
-                  <q-icon name="attach_file" />
-                </template>
-              </q-file>
-              <div class="row q-col-gutter-sm q-mt-sm">
-                <div v-for="(img, idx) in formData.cleopatra.fotoDespues" :key="idx" class="col-6 col-md-3 text-center">
-                  <q-img :src="img.url" alt="Foto Después" style="max-width: 100%; max-height: 100px;"
-                    @click="openViewer(img)" class="cursor-pointer" />
-                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 7. Diagnóstico y Plan de Tratamiento -->
-        <q-expansion-item expand-separator icon="fas fa-clipboard-list" label="7. Diagnóstico y Plan de Tratamiento"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md q-gutter-y-md">
-              <div class="text-subtitle1 text-weight-bold">Diagnóstico Estético</div>
-              <q-input outlined v-model="formData.diagnostico.facial" type="textarea" label="Facial" />
-              <q-input outlined v-model="formData.diagnostico.corporal" type="textarea" label="Corporal" />
-              <q-input outlined v-model="formData.diagnostico.global" type="textarea" label="Diagnóstico global" />
-              <q-separator class="q-my-md" />
-              <div class="text-subtitle1 text-weight-bold">Plan de Tratamiento Estético</div>
-              <q-input outlined v-model="formData.planTratamiento.procedimientosFaciales" type="textarea"
-                label="Procedimientos propuestos (faciales)" />
-              <q-input outlined v-model="formData.planTratamiento.procedimientosCorporales" type="textarea"
-                label="Procedimientos propuestos (corporales)" />
-              <q-input outlined v-model="formData.planTratamiento.sesiones" label="Número de sesiones estimadas"
-                type="number" />
-              <q-input outlined v-model="formData.planTratamiento.indicaciones" type="textarea"
-                label="Indicaciones pre y post tratamiento" />
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-
-        <!-- 8. Consentimientos y Firmas -->
-        <q-expansion-item expand-separator icon="fas fa-file-signature" label="8. Consentimientos y Firmas"
-          header-class="text-h6 text-primary bg-blue-1 non-truncated-header" class="rounded-borders shadow-2">
-          <q-card>
-            <q-card-section class="q-pa-md">
-              <q-checkbox v-model="formData.consentimientos.firmados"
-                label="Se entregan y firman los consentimientos correspondientes a los procedimientos acordados." />
-              <div class="row q-mt-xl q-col-gutter-xl items-end">
-                <div class="col-12 col-md-6">
-                  <q-file v-model="formData.firmas.pacienteFile" label="Subir firma del paciente" outlined
-                    accept="image/*">
-                    <template v-slot:prepend>
+      <q-form
+        @submit.prevent="onSubmit"
+        class="q-gutter-y-lg"
+        :class="{ 'read-only-form': isViewMode }"
+      >
+        <q-stepper
+          v-model="step"
+          animated
+          flat
+          bordered
+          vertical
+          color="primary"
+          header-nav
+        >
+          <!-- 1. Datos de Identificación -->
+          <q-step
+            :name="1"
+            title="1. Datos de Identificación"
+            icon="fas fa-address-card"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md">
+                <div class="row q-col-gutter-md">
+                  <q-input
+                    outlined
+                    v-model="formData.nombreCompleto"
+                    label="Nombre completo"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.edad"
+                    label="Edad"
+                    type="number"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.fechaNacimiento"
+                    mask="date"
+                    label="Fecha de nacimiento"
+                    class="col-12 col-md-6"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy
+                          cover
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date v-model="formData.fechaNacimiento">
+                            <div class="row items-center justify-end">
+                              <q-btn
+                                v-close-popup
+                                label="Cerrar"
+                                color="primary"
+                                flat
+                              />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
                     </template>
-                  </q-file>
-                  <q-img v-if="formData.firmas.paciente" :src="formData.firmas.paciente" alt="Firma del paciente"
-                    style="max-height: 100px; max-width: 100%;" class="q-mt-sm cursor-pointer"
-                    @click="openViewer({ url: formData.firmas.paciente, name: formData.firmas.pacienteName || 'Firma del paciente' })" />
-                  <div v-if="formData.firmas.pacienteName" class="text-caption q-mt-xs text-center">
-                  </div>
-                  <div class="signature-line q-mt-sm"></div>
-                  <div class="text-subtitle2 text-center">Firma del paciente</div>
+                  </q-input>
+                  <q-input
+                    outlined
+                    v-model="formData.documento"
+                    label="Documento de identidad"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.telefono"
+                    label="Teléfono / Celular"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.email"
+                    label="Correo electrónico"
+                    type="email"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.ocupacion"
+                    label="Ocupación"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.ciudadResidencia"
+                    label="Ciudad de residencia"
+                    class="col-12 col-md-6"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.fechaConsulta"
+                    mask="date"
+                    label="Fecha de la consulta"
+                    class="col-12"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy
+                          cover
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date v-model="formData.fechaConsulta">
+                            <div class="row items-center justify-end">
+                              <q-btn
+                                v-close-popup
+                                label="Cerrar"
+                                color="primary"
+                                flat
+                              />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
                 </div>
-                <div class="col-12 col-md-6 text-center">
-                  <q-img :src="formData.firmas.tratante" alt="Firma del tratante"
-                    style="max-height: 100px; max-width: 100%;" class="cursor-pointer"
-                    @click="openViewer({ url: formData.firmas.tratante, name: formData.firmas.tratanteName || 'Firma del tratante' })" />
-                  <div v-if="formData.firmas.tratanteName" class="text-caption q-mt-xs">
-                  </div>
-                  <div class="signature-line"></div>
-                  <div class="text-subtitle2">Firma del profesional tratante</div>
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 2. Motivo de Consulta y Antecedentes -->
+          <q-step
+            :name="2"
+            title="2. Motivo de Consulta y Antecedentes"
+            icon="fas fa-notes-medical"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-md">
+                <div class="text-subtitle1 text-weight-bold">
+                  Motivo de Consulta Estética
                 </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
+                <q-input
+                  outlined
+                  v-model="formData.motivoConsulta.deseoMejora"
+                  type="textarea"
+                  label="¿Qué desea mejorar?"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.motivoConsulta.expectativas"
+                  type="textarea"
+                  label="Expectativas del tratamiento"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.motivoConsulta.tiempoCondicion"
+                  label="Tiempo con la condición estética actual"
+                />
 
-        <div class="row justify-end q-mt-xl" v-if="!isViewMode">
-          <q-btn label="Guardar Paciente" type="submit" color="primary" icon="save" size="lg" />
-        </div>
+                <q-separator class="q-my-md" />
 
+                <div class="text-subtitle1 text-weight-bold">
+                  Antecedentes Médicos Relevantes
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.antecedentes.enfermedades"
+                  type="textarea"
+                  label="Enfermedades previas o actuales"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.antecedentes.cirugiasEsteticas"
+                  type="textarea"
+                  label="Cirugías estéticas previas"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.antecedentes.alergias"
+                  type="textarea"
+                  label="Alergias conocidas"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.antecedentes.medicamentos"
+                  type="textarea"
+                  label="Uso de medicamentos"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.antecedentes.tratamientosPrevios"
+                  type="textarea"
+                  label="Tratamientos estéticos previos y resultados"
+                />
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 3. Evaluaciones Estéticas -->
+          <q-step
+            :name="3"
+            title="3. Evaluaciones Estéticas (Facial y Corporal)"
+            icon="fas fa-user-check"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-md">
+                <div class="text-subtitle1 text-weight-bold">
+                  Evaluación Facial Estética
+                </div>
+                <q-select
+                  outlined
+                  v-model="formData.evaluacionFacial.tipoPiel"
+                  :options="['Seca', 'Grasa', 'Mixta', 'Sensible']"
+                  label="Tipo de piel"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.lesionesActivas"
+                  label="Lesiones activas (acné, rosácea, manchas, cicatrices)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.arrugas"
+                  label="Arrugas (ubicación y profundidad)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.laxitudCutanea"
+                  label="Laxitud cutánea"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.hiperpigmentaciones"
+                  label="Hiperpigmentaciones"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.flacidezMuscular"
+                  label="Flacidez muscular facial"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.hidratacion"
+                  label="Hidratación y luminosidad"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionFacial.simetria"
+                  label="Simetría facial y proporciones"
+                />
+
+                <q-separator class="q-my-md" />
+
+                <div class="text-subtitle1 text-weight-bold">
+                  Evaluación Corporal Estética
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.grasaLocalizada"
+                  label="Zonas de grasa localizada"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.flacidezCutanea"
+                  label="Flacidez cutánea"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.celulitis"
+                  label="Celulitis (grado)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.estrias"
+                  label="Estrías"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.tonicidadMuscular"
+                  label="Tonicidad muscular"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.evaluacionCorporal.retencionLiquidos"
+                  label="Retención de líquidos o edemas"
+                />
+                <div class="row q-col-gutter-sm">
+                  <q-input
+                    outlined
+                    v-model="formData.evaluacionCorporal.peso"
+                    label="Peso (kg)"
+                    type="number"
+                    class="col-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.evaluacionCorporal.talla"
+                    label="Talla (cm)"
+                    type="number"
+                    class="col-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.evaluacionCorporal.imc"
+                    label="IMC"
+                    type="number"
+                    class="col-4"
+                    readonly
+                  />
+                </div>
+                <q-file
+                  v-model="formData.evaluacionCorporal.analisisInBodyFiles"
+                  label="Análisis InBody (subir fotos)"
+                  outlined
+                  multiple
+                  accept="image/*"
+                  counter
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                </q-file>
+                <div class="row q-col-gutter-sm q-mt-sm">
+                  <div
+                    v-for="(img, idx) in formData.evaluacionCorporal.analisisInBody"
+                    :key="idx"
+                    class="col-6 col-md-3 text-center"
+                  >
+                    <q-img
+                      :src="img.url"
+                      alt="Análisis InBody"
+                      style="max-width: 100%; max-height: 100px;"
+                      @click="openViewer(img)"
+                      class="cursor-pointer"
+                    />
+                    <div class="text-caption q-mt-xs">{{ img.name }}</div>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 4. Estilo de Vida -->
+          <q-step
+            :name="4"
+            title="4. Estilo de Vida"
+            icon="fas fa-heart-pulse"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-md">
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.alimentacion"
+                  label="Alimentación"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.hidratacion"
+                  label="Hidratación"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.actividadFisica"
+                  label="Actividad física"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.calidadSueno"
+                  label="Calidad del sueño"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.estres"
+                  label="Estrés percibido"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.estiloVida.tabaquismoAlcohol"
+                  label="Tabaquismo / alcohol"
+                />
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 5. Escalas de Evaluación -->
+          <q-step
+            :name="5"
+            title="5. Escalas de Evaluación"
+            icon="fas fa-ruler-combined"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-lg">
+                <q-option-group
+                  :options="glogauOptions"
+                  type="radio"
+                  v-model="formData.escalas.glogau"
+                  label="Escala de Glogau (Envejecimiento)"
+                >
+                  <template v-slot:label="opt">
+                    <div class="row items-center">
+                      <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
+                      <span>{{ opt.description }}</span>
+                    </div>
+                  </template>
+                </q-option-group>
+                <q-separator />
+                <div class="text-subtitle1 text-weight-bold">
+                  Escala de Baumann (Tipo de Piel)
+                </div>
+                <div class="row q-col-gutter-md">
+                  <q-select
+                    class="col-6 col-md-3"
+                    outlined
+                    v-model="formData.escalas.baumann.humedad"
+                    :options="['Seca', 'Grasa']"
+                    label="Humedad"
+                  />
+                  <q-select
+                    class="col-6 col-md-3"
+                    outlined
+                    v-model="formData.escalas.baumann.sensibilidad"
+                    :options="['Sensible', 'Resistente']"
+                    label="Sensibilidad"
+                  />
+                  <q-select
+                    class="col-6 col-md-3"
+                    outlined
+                    v-model="formData.escalas.baumann.pigmentacion"
+                    :options="['Pigmentada', 'No Pigmentada']"
+                    label="Pigmentación"
+                  />
+                  <q-select
+                    class="col-6 col-md-3"
+                    outlined
+                    v-model="formData.escalas.baumann.firmeza"
+                    :options="['Arrugada', 'Firme']"
+                    label="Firmeza"
+                  />
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.escalas.baumann.combinacion"
+                  label="Combinación final del tipo de piel"
+                />
+                <q-separator />
+                <q-option-group
+                  :options="fitzpatrickOptions"
+                  type="radio"
+                  v-model="formData.escalas.fitzpatrick"
+                  label="Escala de Fitzpatrick (Fototipo)"
+                >
+                  <template v-slot:label="opt">
+                    <div class="row items-center">
+                      <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
+                      <span>{{ opt.description }}</span>
+                    </div>
+                  </template>
+                </q-option-group>
+                <q-separator />
+                <q-option-group
+                  :options="fotoenvejecimientoOptions"
+                  type="radio"
+                  v-model="formData.escalas.fotoenvejecimiento"
+                  label="Escala de Fotoenvejecimiento (Daño Solar)"
+                >
+                  <template v-slot:label="opt">
+                    <div class="row items-center">
+                      <span class="text-weight-bold q-mr-sm">{{ opt.label }}</span>
+                      <span>{{ opt.description }}</span>
+                    </div>
+                  </template>
+                </q-option-group>
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 6. Análisis Avanzados -->
+          <q-step
+            :name="6"
+            title="6. Análisis Avanzados (Impedanciometría y Cleopatra)"
+            icon="fas fa-microscope"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-md">
+                <div class="text-subtitle1 text-weight-bold">
+                  Evaluación por Impedanciometría Corporal
+                </div>
+                <div class="row q-col-gutter-sm">
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.grasaCorporal"
+                    label="% de grasa corporal"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.masaMuscular"
+                    label="Masa muscular"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.masaOsea"
+                    label="Masa ósea"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.aguaCorporal"
+                    label="Agua corporal total"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.grasaVisceral"
+                    label="Índice de grasa visceral"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.impedanciometria.edadMetabolica"
+                    label="Edad metabólica"
+                    class="col-6 col-md-4"
+                  />
+                </div>
+                <q-separator class="q-my-md" />
+
+                <div class="text-subtitle1 text-weight-bold">
+                  Análisis Facial con Sistema Cleopatra
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.cleopatra.resultadoGeneral"
+                  type="textarea"
+                  label="Resultado del escaneo facial computarizado"
+                />
+                <div class="row q-col-gutter-sm">
+                  <q-input
+                    outlined
+                    v-model="formData.cleopatra.hidratacion"
+                    label="% de hidratación"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.cleopatra.elasticidad"
+                    label="% de elasticidad"
+                    class="col-6 col-md-4"
+                  />
+                  <q-input
+                    outlined
+                    v-model="formData.cleopatra.poros"
+                    label="Poros (tamaño y cantidad)"
+                    class="col-12 col-md-4"
+                  />
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.cleopatra.manchas"
+                  label="Presencia de manchas (cantidad y profundidad)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.cleopatra.arrugas"
+                  label="Detección de arrugas finas y profundas"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.cleopatra.evaluacionZonas"
+                  label="Evaluación por zonas: frente / mejillas / mentón / nariz"
+                />
+                <q-file
+                  outlined
+                  v-model="formData.cleopatra.fotoAntesFiles"
+                  label="Foto comparativa (Antes)"
+                  multiple
+                  counter
+                  accept="image/*"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                </q-file>
+                <div class="row q-col-gutter-sm q-mt-sm">
+                  <div
+                    v-for="(img, idx) in formData.cleopatra.fotoAntes"
+                    :key="idx"
+                    class="col-6 col-md-3 text-center"
+                  >
+                    <q-img
+                      :src="img.url"
+                      alt="Foto Antes"
+                      style="max-width: 100%; max-height: 100px;"
+                      @click="openViewer(img)"
+                      class="cursor-pointer"
+                    />
+                    <div class="text-caption q-mt-xs">{{ img.name }}</div>
+                  </div>
+                </div>
+                <q-file
+                  outlined
+                  v-model="formData.cleopatra.fotoDespuesFiles"
+                  label="Foto comparativa (Después)"
+                  multiple
+                  counter
+                  accept="image/*"
+                  class="q-mt-md"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                </q-file>
+                <div class="row q-col-gutter-sm q-mt-sm">
+                  <div
+                    v-for="(img, idx) in formData.cleopatra.fotoDespues"
+                    :key="idx"
+                    class="col-6 col-md-3 text-center"
+                  >
+                    <q-img
+                      :src="img.url"
+                      alt="Foto Después"
+                      style="max-width: 100%; max-height: 100px;"
+                      @click="openViewer(img)"
+                      class="cursor-pointer"
+                    />
+                    <div class="text-caption q-mt-xs">{{ img.name }}</div>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 7. Diagnóstico y Plan de Tratamiento -->
+          <q-step
+            :name="7"
+            title="7. Diagnóstico y Plan de Tratamiento"
+            icon="fas fa-clipboard-list"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md q-gutter-y-md">
+                <div class="text-subtitle1 text-weight-bold">
+                  Diagnóstico Estético
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.diagnostico.facial"
+                  type="textarea"
+                  label="Facial"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.diagnostico.corporal"
+                  type="textarea"
+                  label="Corporal"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.diagnostico.global"
+                  type="textarea"
+                  label="Diagnóstico global"
+                />
+                <q-separator class="q-my-md" />
+                <div class="text-subtitle1 text-weight-bold">
+                  Plan de Tratamiento Estético
+                </div>
+                <q-input
+                  outlined
+                  v-model="formData.planTratamiento.procedimientosFaciales"
+                  type="textarea"
+                  label="Procedimientos propuestos (faciales)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.planTratamiento.procedimientosCorporales"
+                  type="textarea"
+                  label="Procedimientos propuestos (corporales)"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.planTratamiento.sesiones"
+                  label="Número de sesiones estimadas"
+                  type="number"
+                />
+                <q-input
+                  outlined
+                  v-model="formData.planTratamiento.indicaciones"
+                  type="textarea"
+                  label="Indicaciones pre y post tratamiento"
+                />
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn color="primary" label="Siguiente" @click="step++" />
+            </q-stepper-navigation>
+          </q-step>
+
+          <!-- 8. Consentimientos y Firmas -->
+          <q-step
+            :name="8"
+            title="8. Consentimientos y Firmas"
+            icon="fas fa-file-signature"
+          >
+            <q-card>
+              <q-card-section class="q-pa-md">
+                <q-checkbox
+                  v-model="formData.consentimientos.firmados"
+                  label="Se entregan y firman los consentimientos correspondientes a los procedimientos acordados."
+                />
+                <div class="row q-mt-xl q-col-gutter-xl items-end">
+                  <div class="col-12 col-md-6">
+                    <q-file
+                      v-model="formData.firmas.pacienteFile"
+                      label="Subir firma del paciente"
+                      outlined
+                      accept="image/*"
+                    >
+                      <template v-slot:prepend></template>
+                    </q-file>
+                    <q-img
+                      v-if="formData.firmas.paciente"
+                      :src="formData.firmas.paciente"
+                      alt="Firma del paciente"
+                      style="max-height: 100px; max-width: 100%;"
+                      class="q-mt-sm cursor-pointer"
+                      @click="openViewer({ url: formData.firmas.paciente, name: formData.firmas.pacienteName || 'Firma del paciente' })"
+                    />
+                    <div v-if="formData.firmas.pacienteName" class="text-caption q-mt-xs text-center"></div>
+                    <div class="signature-line q-mt-sm"></div>
+                    <div class="text-subtitle2 text-center">
+                      Firma del paciente
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6 text-center">
+                    <q-img
+                      :src="formData.firmas.tratante"
+                      alt="Firma del tratante"
+                      style="max-height: 100px; max-width: 100%;"
+                      class="cursor-pointer"
+                      @click="openViewer({ url: formData.firmas.tratante, name: formData.firmas.tratanteName || 'Firma del tratante' })"
+                    />
+                    <div v-if="formData.firmas.tratanteName" class="text-caption q-mt-xs"></div>
+                    <div class="signature-line"></div>
+                    <div class="text-subtitle2">
+                      Firma del profesional tratante
+                    </div>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+            <q-stepper-navigation>
+              <q-btn flat color="primary" label="Atrás" @click="step--" class="q-mr-sm" />
+              <q-btn
+                v-if="!isViewMode"
+                label="Guardar Paciente"
+                type="submit"
+                color="primary"
+                icon="save"
+              />
+            </q-stepper-navigation>
+          </q-step>
+        </q-stepper>
       </q-form>
     </div>
 
     <q-dialog v-model="viewerOpen">
-  <q-card class="bg-transparent" style="width: 90vw; max-width: 90vw;">
-    <q-img :src="selectedImage.url" fit="contain" style="max-height: 90vh;">
-      <template v-slot:top-right>
-        <q-btn icon="close" flat round dense @click="viewerOpen = false" color="white" class="bg-grey-8" />
-      </template>
-      <template v-slot:after>
-        <div class="absolute-bottom text-center bg-black text-white q-pa-sm">
-          {{ selectedImage.name }}
-        </div>
-      </template>
-    </q-img>
-  </q-card>
-</q-dialog>
+      <q-card class="bg-transparent" style="width: 90vw; max-width: 90vw;">
+        <q-img :src="selectedImage.url" fit="contain" style="max-height: 90vh;">
+          <template v-slot:top-right>
+            <q-btn icon="close" flat round dense @click="viewerOpen = false" color="white" class="bg-grey-8" />
+          </template>
+          <template v-slot:after>
+            <div class="absolute-bottom text-center bg-black text-white q-pa-sm">
+              {{ selectedImage.name }}
+            </div>
+          </template>
+        </q-img>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -374,6 +832,8 @@ const mode = computed(() => route.query.mode || 'create')
 const isViewMode = computed(() => mode.value === 'view')
 const patientId = computed(() => route.query.patientId ? String(route.query.patientId) : null)
 const recordId = computed(() => route.query.recordId ? String(route.query.recordId) : null)
+
+const step = ref(1)
 
 const viewerOpen = ref(false)
 const selectedImage = ref({ url: '', name: '' })
