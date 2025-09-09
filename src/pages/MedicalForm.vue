@@ -1,14 +1,24 @@
 <template>
   <q-page padding class="flex flex-center bg-grey-2">
     <div class="q-pa-md" style="width: 100%; max-width: 900px;">
-      <q-btn
-        label="Volver al inicio"
-        icon="home"
-        color="primary"
-        flat
-        class="q-mb-md"
-        @click="router.push('/')"
-      />
+      <div class="row items-center q-mb-md">
+        <q-btn
+          label="Inicio"
+          icon="home"
+          color="primary"
+          flat
+          @click="router.push('/')"
+        />
+        <q-space />
+        <q-btn
+          v-if="patientId"
+          label="Volver"
+          icon="arrow_back"
+          color="primary"
+          flat
+          @click="router.push({ path: '/historial', query: { id: patientId } })"
+        />
+      </div>
 
       <div class="text-h4 text-center text-primary q-mb-md">
         Ficha de Paciente - Estética Médica

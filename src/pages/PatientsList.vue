@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <q-btn
-      label="Volver al inicio"
+      label="Inicio"
       icon="home"
       color="primary"
       flat
