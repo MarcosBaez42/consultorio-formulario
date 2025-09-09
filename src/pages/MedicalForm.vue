@@ -251,12 +251,20 @@
                 label="Evaluación por zonas: frente / mejillas / mentón / nariz" />
               <q-file outlined v-model="formData.cleopatra.fotoAntesFile" label="Foto comparativa (Antes)"
                 class="col-12 col-md-6" accept="image/*" />
-              <img v-if="formData.cleopatra.fotoAntes" :src="formData.cleopatra.fotoAntes" alt="Foto Antes"
-                class="q-mt-sm" style="max-width: 100%; max-height: 200px;" />
+              <q-img v-if="formData.cleopatra.fotoAntes" :src="formData.cleopatra.fotoAntes" alt="Foto Antes"
+                class="q-mt-sm cursor-pointer" style="max-width: 100%; max-height: 100px;"
+                @click="openViewer({ url: formData.cleopatra.fotoAntes, name: formData.cleopatra.fotoAntesName || 'Foto Antes' })" />
+              <div v-if="formData.cleopatra.fotoAntesName" class="text-caption q-mt-xs">
+                {{ formData.cleopatra.fotoAntesName }}
+              </div>
               <q-file outlined v-model="formData.cleopatra.fotoDespuesFile" label="Foto comparativa (Después)"
                 class="col-12 col-md-6" accept="image/*" />
-              <img v-if="formData.cleopatra.fotoDespues" :src="formData.cleopatra.fotoDespues" alt="Foto Después"
-                class="q-mt-sm" style="max-width: 100%; max-height: 200px;" />
+              <q-img v-if="formData.cleopatra.fotoDespues" :src="formData.cleopatra.fotoDespues" alt="Foto Después"
+                class="q-mt-sm cursor-pointer" style="max-width: 100%; max-height: 100px;"
+                @click="openViewer({ url: formData.cleopatra.fotoDespues, name: formData.cleopatra.fotoDespuesName || 'Foto Después' })" />
+              <div v-if="formData.cleopatra.fotoDespuesName" class="text-caption q-mt-xs">
+                {{ formData.cleopatra.fotoDespuesName }}
+              </div>
             </q-card-section>
           </q-card>
         </q-expansion-item>
@@ -299,14 +307,20 @@
                       <q-icon name="signature" />
                     </template>
                   </q-file>
-                  <img v-if="formData.firmas.paciente" :src="formData.firmas.paciente" alt="Firma del paciente"
-                    style="max-height: 100px; max-width: 100%;" class="q-mt-sm" />
+                  <q-img v-if="formData.firmas.paciente" :src="formData.firmas.paciente" alt="Firma del paciente"
+                    style="max-height: 100px; max-width: 100%;" class="q-mt-sm cursor-pointer"
+                    @click="openViewer({ url: formData.firmas.paciente, name: formData.firmas.pacienteName || 'Firma del paciente' })" />
+                  <div v-if="formData.firmas.pacienteName" class="text-caption q-mt-xs text-center">
+                  </div>
                   <div class="signature-line q-mt-sm"></div>
                   <div class="text-subtitle2 text-center">Firma del paciente</div>
                 </div>
                 <div class="col-12 col-md-6 text-center">
-                  <img :src="formData.firmas.tratante" alt="Firma del tratante"
-                    style="max-height: 100px; max-width: 100%;" />
+                  <q-img :src="formData.firmas.tratante" alt="Firma del tratante"
+                    style="max-height: 100px; max-width: 100%;" class="cursor-pointer"
+                    @click="openViewer({ url: formData.firmas.tratante, name: formData.firmas.tratanteName || 'Firma del tratante' })" />
+                  <div v-if="formData.firmas.tratanteName" class="text-caption q-mt-xs">
+                  </div>
                   <div class="signature-line"></div>
                   <div class="text-subtitle2">Firma del profesional tratante</div>
                 </div>
@@ -327,6 +341,11 @@
     <q-img :src="selectedImage.url" fit="contain" style="max-height: 90vh;">
       <template v-slot:top-right>
         <q-btn icon="close" flat round dense @click="viewerOpen = false" color="white" class="bg-grey-8" />
+      </template>
+      <template v-slot:after>
+        <div class="absolute-bottom text-center bg-black text-white q-pa-sm">
+          {{ selectedImage.name }}
+        </div>
       </template>
     </q-img>
   </q-card>
@@ -352,6 +371,12 @@ const selectedImage = ref({ url: '', name: '' })
 const openViewer = (img) => {
   selectedImage.value = img
   viewerOpen.value = true
+}
+
+const extractFileName = (path) => {
+  if (!path) return ''
+  const parts = path.split('?')[0].split('/')
+  return parts[parts.length - 1]
 }
 
 const formData = ref({
@@ -456,6 +481,8 @@ const formData = ref({
     fotoDespues: null,
     fotoAntesFile: null,
     fotoDespuesFile: null,
+    fotoAntesName: '',
+    fotoDespuesName: '',
   },
 
   // Diagnóstico y Plan
@@ -478,10 +505,12 @@ const formData = ref({
   firmas: {
     paciente: null,
     pacienteFile: null,
+    pacienteName: '',
     // IMPORTANTE: Reemplaza esta URL con la ruta a la imagen de la firma del profesional
     // Puede ser una ruta local (ej. '/signatures/doctor-signature.png') si está en tu carpeta /public
     // O una URL completa si está alojada en otro lugar.
-    tratante: 'https://placehold.co/250x100/000000/FFFFFF?text=Firma+Doctor&font=script'
+    tratante: 'https://placehold.co/250x100/000000/FFFFFF?text=Firma+Doctor&font=script',
+    tratanteName: 'firma-tratante.png'
   }
 
 });
@@ -499,9 +528,14 @@ onMounted(() => {
       }
       if (record) {
         formData.value = JSON.parse(JSON.stringify(record))
+        formData.value.cleopatra.fotoAntesName = extractFileName(formData.value.cleopatra.fotoAntes)
+        formData.value.cleopatra.fotoDespuesName = extractFileName(formData.value.cleopatra.fotoDespues)
+        formData.value.firmas.pacienteName = extractFileName(formData.value.firmas.paciente)
+        formData.value.firmas.tratanteName = formData.value.firmas.tratanteName || extractFileName(formData.value.firmas.tratante)
       }
     }
   }
+  formData.value.firmas.tratanteName = formData.value.firmas.tratanteName || extractFileName(formData.value.firmas.tratante)
 })
 
 // Calcula el IMC automáticamente
@@ -570,6 +604,7 @@ const uploadImage = async (file) => {
 
 watch(() => formData.value.firmas.pacienteFile, async (file) => {
   if (file) {
+    formData.value.firmas.pacienteName = file.name;
     const previewUrl = URL.createObjectURL(file);
     formData.value.firmas.paciente = previewUrl;
     const url = await uploadImage(file);
@@ -585,6 +620,7 @@ watch(() => formData.value.firmas.pacienteFile, async (file) => {
 
 watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
   if (file) {
+    formData.value.cleopatra.fotoAntesName = file.name;
     const previewUrl = URL.createObjectURL(file);
     formData.value.cleopatra.fotoAntes = previewUrl;
     const url = await uploadImage(file);
@@ -600,6 +636,7 @@ watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
 
 watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
   if (file) {
+    formData.value.cleopatra.fotoDespuesName = file.name;
     const previewUrl = URL.createObjectURL(file);
     formData.value.cleopatra.fotoDespues = previewUrl;
     const url = await uploadImage(file);
