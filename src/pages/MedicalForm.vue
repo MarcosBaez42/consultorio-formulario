@@ -551,31 +551,46 @@ const uploadImage = async (file) => {
 
 watch(() => formData.value.firmas.pacienteFile, async (file) => {
   if (file) {
+    const previewUrl = URL.createObjectURL(file);
+    formData.value.firmas.paciente = previewUrl;
     const url = await uploadImage(file);
+    URL.revokeObjectURL(previewUrl);
     if (url) {
       formData.value.firmas.paciente = url;
-      formData.value.firmas.pacienteFile = null;
+    } else {
+      formData.value.firmas.paciente = null;
     }
+    formData.value.firmas.pacienteFile = null;
   }
 });
 
 watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
   if (file) {
+    const previewUrl = URL.createObjectURL(file);
+    formData.value.cleopatra.fotoAntes = previewUrl;
     const url = await uploadImage(file);
+    URL.revokeObjectURL(previewUrl);
     if (url) {
       formData.value.cleopatra.fotoAntes = url;
-      formData.value.cleopatra.fotoAntesFile = null;
+    } else {
+      formData.value.cleopatra.fotoAntes = null;
     }
+    formData.value.cleopatra.fotoAntesFile = null;
   }
 });
 
 watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
   if (file) {
+    const previewUrl = URL.createObjectURL(file);
+    formData.value.cleopatra.fotoDespues = previewUrl;
     const url = await uploadImage(file);
+    URL.revokeObjectURL(previewUrl);
     if (url) {
       formData.value.cleopatra.fotoDespues = url;
-      formData.value.cleopatra.fotoDespuesFile = null;
+    } else {
+      formData.value.cleopatra.fotoDespues = null;
     }
+    formData.value.cleopatra.fotoDespuesFile = null;
   }
 });
 
@@ -594,7 +609,6 @@ watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files)
     }
   }
 });
-
 
 const onSubmit = () => {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
