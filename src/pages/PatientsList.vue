@@ -11,7 +11,7 @@
     <div class="text-h5 q-mb-md">Pacientes Registrados</div>
     <q-table :rows="patients" :columns="columns" row-key="id" class="full-width">
       <template v-slot:body-cell-actions="props">
-        <div class="row justify-center no-wrap">
+        <div class="row items-center justify-center no-wrap">
           <q-btn
             color="primary"
             round
@@ -46,21 +46,23 @@ const $q = useQuasar()
 const patients = ref([])
 
 const columns = [
+  { name: 'index', label: 'N°', field: 'index', align: 'center', style: 'width: 5%' },
   { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'center', style: 'width: 20%' },
   { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 13%' },
   { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 15%' },
   { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'center', style: 'width: 13%' },
   { name: 'email', label: 'Email', field: 'email', align: 'center', style: 'width: 13%' },
   { name: 'fechaConsulta', label: 'Fecha Consulta', field: 'fechaConsulta', align: 'center', style: 'width: 13%' },
-  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center', }
+  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center' }
 ]
 
 onMounted(() => {
   const stored = JSON.parse(localStorage.getItem('patients') || '[]')
-  patients.value = stored.map(p => {
+  patients.value = stored.map((p, index) => {
     const records = p.records || []
     const latest = records[records.length - 1] || {}
     return {
+      index: index + 1,
       id: p.id,
       nombreCompleto: latest.nombreCompleto,
       edad: latest.edad,
@@ -95,7 +97,9 @@ function deletePatient (id) {
     stored.splice(idx, 1)
     localStorage.setItem('patients', JSON.stringify(stored))
     $q.notify({ type: 'positive', message: 'Paciente eliminado' })
-    patients.value = patients.value.filter(p => p.id !== id)
+    patients.value = patients.value
+      .filter(p => p.id !== id)
+      .map((p, index) => ({ ...p, index: index + 1 }))
   } else {
     $q.notify({ type: 'negative', message: 'Paciente no encontrado' })
   }

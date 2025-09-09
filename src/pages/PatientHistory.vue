@@ -14,7 +14,7 @@
         <q-btn color="primary" flat label="Nuevo registro" @click="newRecord" />
       </template>
       <template v-slot:body-cell-actions="props">
-        <div class="row justify-center no-wrap">
+        <div class="row items-center justify-center no-wrap">
           <q-btn
             color="secondary"
             round
@@ -50,8 +50,8 @@ const patientId = route.query.id ? String(route.query.id) : null
 const records = ref([])
 
 const columns = [
-  { name: 'fechaConsulta', label: 'Fecha', field: 'fechaConsulta', align: 'left' },
-  { name: 'resumen', label: 'Resumen', field: 'resumen', align: 'left' },
+  { name: 'index', label: 'N°', field: 'index', align: 'center', style: 'width: 5%' },
+  { name: 'fechaConsulta', label: 'Fecha', field: 'fechaConsulta', align: 'center' },
   { name: 'actions', label: 'Opciones', field: 'actions', align: 'center' }
 ]
 
@@ -59,8 +59,9 @@ onMounted(() => {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
   const patient = patients.find(p => p.id === patientId)
   if (patient && patient.records) {
-    records.value = patient.records.map(r => ({
+    records.value = patient.records.map((r, index) => ({
       ...r,
+      index: index + 1,
       resumen: r.motivoConsulta?.deseoMejora || ''
     }))
   } else {
@@ -96,8 +97,9 @@ function deleteRecord (id) {
       patient.records.splice(idx, 1)
       localStorage.setItem('patients', JSON.stringify(patients))
       $q.notify({ type: 'positive', message: 'Registro eliminado' })
-      records.value = patient.records.map(r => ({
+      records.value = patient.records.map((r, index) => ({
         ...r,
+        index: index + 1,
         resumen: r.motivoConsulta?.deseoMejora || ''
       }))
     } else {
