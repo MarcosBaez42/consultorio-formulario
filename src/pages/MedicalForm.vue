@@ -133,8 +133,10 @@
                 </template>
               </q-file>
               <div class="row q-col-gutter-sm q-mt-sm">
-                <div v-for="(img, idx) in formData.evaluacionCorporal.analisisInBody" :key="idx" class="col-6 col-md-3">
-                  <img :src="img" alt="Análisis InBody" style="max-width: 100%; max-height: 100px;" />
+                <div v-for="(img, idx) in formData.evaluacionCorporal.analisisInBody" :key="idx" class="col-6 col-md-3 text-center">
+                  <q-img :src="img.url" alt="Análisis InBody" style="max-width: 100%; max-height: 100px;"
+                    @click="openViewer(img)" class="cursor-pointer" />
+                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
                 </div>
               </div>
             </q-card-section>
@@ -319,6 +321,14 @@
 
       </q-form>
     </div>
+
+    <q-dialog v-model="viewerOpen" maximized>
+      <q-img :src="selectedImage.url">
+        <template v-slot:top-right>
+          <q-btn icon="close" flat round @click="viewerOpen = false" />
+        </template>
+      </q-img>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -334,6 +344,13 @@ const mode = computed(() => route.query.mode || 'create')
 const isViewMode = computed(() => mode.value === 'view')
 const patientId = computed(() => route.query.patientId ? String(route.query.patientId) : null)
 const recordId = computed(() => route.query.recordId ? String(route.query.recordId) : null)
+
+const viewerOpen = ref(false)
+const selectedImage = ref({ url: '', name: '' })
+const openViewer = (img) => {
+  selectedImage.value = img
+  viewerOpen.value = true
+}
 
 const formData = ref({
   // 1. Datos de Identificación
@@ -386,7 +403,7 @@ const formData = ref({
     peso: null,
     talla: null,
     imc: null,
-    analisisInBody: [], // paths to uploaded images
+    analisisInBody: [], // array of { url, name }
     analisisInBodyFiles: [],
   },
 
@@ -596,17 +613,13 @@ watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
 
 watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files) => {
   if (files && files.length) {
-    const paths = [];
     for (const f of Array.from(files)) {
-      const path = await uploadImage(f);
-      if (path) {
-        paths.push(path);
+      const url = await uploadImage(f);
+      if (url) {
+        formData.value.evaluacionCorporal.analisisInBody.push({ url, name: f.name });
       }
     }
-    if (paths.length === files.length) {
-      formData.value.evaluacionCorporal.analisisInBody = paths;
-      formData.value.evaluacionCorporal.analisisInBodyFiles = [];
-    }
+    formData.value.evaluacionCorporal.analisisInBodyFiles = [];
   }
 });
 
