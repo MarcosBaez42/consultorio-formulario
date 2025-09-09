@@ -14,11 +14,11 @@
         <q-btn color="primary" flat label="Nuevo registro" @click="newRecord" />
       </template>
       <template v-slot:body-cell-actions="props">
-        <q-btn color="secondary" flat label="Editar" @click="editRecord(props.row)" />
+        <q-btn color="secondary" flat icon="edit" @click="editRecord(props.row)" />
         <q-btn
           color="negative"
           flat
-          label="Eliminar"
+          icon="delete"
           class="q-ml-sm"
           @click="confirmDelete(props.row.id)"
         />
@@ -41,7 +41,7 @@ const records = ref([])
 
 const columns = [
   { name: 'fechaConsulta', label: 'Fecha', field: 'fechaConsulta', align: 'left' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
+  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center' }
 ]
 
 onMounted(() => {
