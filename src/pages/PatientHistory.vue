@@ -41,6 +41,7 @@ const records = ref([])
 
 const columns = [
   { name: 'fechaConsulta', label: 'Fecha', field: 'fechaConsulta', align: 'left' },
+  { name: 'resumen', label: 'Resumen', field: 'resumen', align: 'left' },
   { name: 'actions', label: 'Opciones', field: 'actions', align: 'center' }
 ]
 
@@ -48,7 +49,10 @@ onMounted(() => {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
   const patient = patients.find(p => p.id === patientId)
   if (patient && patient.records) {
-    records.value = patient.records
+    records.value = patient.records.map(r => ({
+      ...r,
+      resumen: r.motivoConsulta?.deseoMejora || ''
+    }))
   } else {
     router.push('/pacientes')
   }
@@ -82,7 +86,10 @@ function deleteRecord (id) {
       patient.records.splice(idx, 1)
       localStorage.setItem('patients', JSON.stringify(patients))
       $q.notify({ type: 'positive', message: 'Registro eliminado' })
-      records.value = [...patient.records]
+      records.value = patient.records.map(r => ({
+        ...r,
+        resumen: r.motivoConsulta?.deseoMejora || ''
+      }))
     } else {
       $q.notify({ type: 'negative', message: 'Registro no encontrado' })
     }

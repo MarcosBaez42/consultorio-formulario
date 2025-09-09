@@ -51,7 +51,7 @@ const columns = [
   { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'center', style: 'width: 13%' },
   { name: 'email', label: 'Email', field: 'email', align: 'center', style: 'width: 13%' },
   { name: 'fechaConsulta', label: 'Fecha Consulta', field: 'fechaConsulta', align: 'center', style: 'width: 13%' },
-  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center',}
+  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center', }
 ]
 
 onMounted(() => {
