@@ -322,13 +322,15 @@
       </q-form>
     </div>
 
-    <q-dialog v-model="viewerOpen" maximized>
-      <q-img :src="selectedImage.url">
-        <template v-slot:top-right>
-          <q-btn icon="close" flat round @click="viewerOpen = false" />
-        </template>
-      </q-img>
-    </q-dialog>
+    <q-dialog v-model="viewerOpen">
+  <q-card class="bg-transparent" style="width: 90vw; max-width: 90vw;">
+    <q-img :src="selectedImage.url" fit="contain" style="max-height: 90vh;">
+      <template v-slot:top-right>
+        <q-btn icon="close" flat round dense @click="viewerOpen = false" color="white" class="bg-grey-8" />
+      </template>
+    </q-img>
+  </q-card>
+</q-dialog>
   </q-page>
 </template>
 
