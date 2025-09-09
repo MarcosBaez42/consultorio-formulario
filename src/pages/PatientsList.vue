@@ -36,10 +36,10 @@ const $q = useQuasar()
 const patients = ref([])
 
 const columns = [
-  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 30%' },
-  { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 15%' },
-  { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 25%' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center', style: 'width: 30%' }
+  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 25%' },
+  { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 30%' },
+  { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 30%' },
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center', style: 'width: 15%' }
 ]
 
 onMounted(() => {
