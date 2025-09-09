@@ -1,26 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+/* Definir una paleta de colores profesional */
+:root {
+  --primary: #00796b; /* Un verde azulado elegante */
+  --secondary: #26a69a;
+  --accent: #80cbc4;
+  --positive: #2e7d32;
+  --negative: #c62828;
+  --info: #0277bd;
+  --warning: #f9a825;
+
 
 /* Global styles for a cleaner, professional look */
+  --background-page: #f5f7fa; /* Un gris muy suave para el fondo */
+  --text-dark: #333;
+  --text-grey: #666;
+  --border-color: #e0e0e0;
+}
+
+/* Aplicar la paleta a los componentes de Quasar */
+body {
 body {
   margin: 0;
+  margin: 0;
   background-color: #f5f7fa;
+  background-color: var(--background-page);
   font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   color: #2c3e50;
+  color: var(--text-dark);
 }
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+.text-primary {
+  color: var(--primary) !important;
+}
+
+/* Mejorar el estilo de los encabezados de sección */
+.section-header {
+  background-color: #e8f5e9; /* Un verde muy pálido */
+  color: var(--primary);
+  border-left: 5px solid var(--primary);
+  font-weight: 600;
+}
+}
+
 
 /* Cards gain a subtle elevation on hover */
+/* Cards gain a subtle elevation on hover */
+.q-card {
 .q-card {
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
+}
+
 
 .q-card:hover {
+.q-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
+  transform: translateY(-2px);
+}
 }
 
+
+/* Responsive container for page content */
 /* Responsive container for page content */
 .container {
+.container {
+  width: 100%;
   width: 100%;
   max-width: 1200px;
+  max-width: 1200px;
   margin: 0 auto;
+  margin: 0 auto;
+}
 }
