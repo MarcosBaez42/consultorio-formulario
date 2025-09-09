@@ -11,11 +11,20 @@
     <div class="text-h5 q-mb-md">Pacientes Registrados</div>
     <q-table :rows="patients" :columns="columns" row-key="id" class="full-width">
       <template v-slot:body-cell-actions="props">
-        <q-btn color="primary" flat label="Ver" @click="viewPatient(props.row)" />
+        <q-btn
+          color="primary"
+          flat
+          round
+          dense
+          icon="visibility"
+          @click="viewPatient(props.row)"
+        />
         <q-btn
           color="negative"
           flat
-          label="Eliminar"
+          round
+          dense
+          icon="delete"
           class="q-ml-sm"
           @click="confirmDelete(props.row.id)"
         />
@@ -39,7 +48,7 @@ const columns = [
   { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 25%' },
   { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 30%' },
   { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 30%' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center', style: 'width: 15%' }
+  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center', style: 'width: 15%' }
 ]
 
 onMounted(() => {
