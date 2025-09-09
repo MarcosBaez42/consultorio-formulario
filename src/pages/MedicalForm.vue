@@ -18,6 +18,7 @@
       </p>
 
       <q-form
+        ref="form"
         @submit.prevent="onSubmit"
         class="q-gutter-y-lg"
         :class="{ 'read-only-form': isViewMode }"
@@ -45,6 +46,8 @@
                     v-model="formData.nombreCompleto"
                     label="Nombre completo"
                     class="col-12 col-md-6"
+                    :rules="[required]"
+                    lazy-rules
                   />
                   <q-input
                     outlined
@@ -52,6 +55,8 @@
                     label="Edad"
                     type="number"
                     class="col-12 col-md-6"
+                    :rules="[positive]"
+                    lazy-rules
                   />
                   <q-input
                     outlined
@@ -59,6 +64,8 @@
                     mask="date"
                     label="Fecha de nacimiento"
                     class="col-12 col-md-6"
+                    :rules="[required]"
+                    lazy-rules
                   >
                     <template v-slot:append>
                       <q-icon name="event" class="cursor-pointer">
@@ -86,6 +93,8 @@
                     v-model="formData.documento"
                     label="Documento de identidad"
                     class="col-12 col-md-6"
+                    :rules="[required]"
+                    lazy-rules
                   />
                   <q-input
                     outlined
@@ -99,6 +108,8 @@
                     label="Correo electrónico"
                     type="email"
                     class="col-12 col-md-6"
+                    :rules="[emailRule]"
+                    lazy-rules
                   />
                   <q-input
                     outlined
@@ -835,6 +846,11 @@ const recordId = computed(() => route.query.recordId ? String(route.query.record
 
 const step = ref(1)
 
+const form = ref(null)
+const required = (val) => !!val || 'Campo obligatorio'
+const positive = (val) => (val !== null && val !== '' && Number(val) > 0) || 'Debe ser mayor a 0'
+const emailRule = (val) => /.+@.+\..+/.test(val) || 'Correo electrónico inválido'
+
 const viewerOpen = ref(false)
 const selectedImage = ref({ url: '', name: '' })
 const openViewer = (img) => {
@@ -1129,36 +1145,48 @@ watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files)
 });
 
 const onSubmit = () => {
-  const patients = JSON.parse(localStorage.getItem('patients') || '[]')
-  if (patientId.value) {
-    const patient = patients.find(p => p.id === patientId.value)
-    if (patient) {
-      if (recordId.value && mode.value === 'edit') {
-        const idx = patient.records.findIndex(r => r.id === recordId.value)
-        if (idx !== -1) {
-          patient.records[idx] = { id: recordId.value, ...JSON.parse(JSON.stringify(formData.value)) }
-        }
-      } else {
-        patient.records.push({ id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) })
-      }
+  form.value.validate().then(success => {
+    if (!success) {
+      $q.notify({
+        color: 'negative',
+        textColor: 'white',
+        icon: 'error',
+        message: 'Por favor completa los campos requeridos'
+      })
+      return
     }
-  } else {
-    const newRecord = { id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) }
-    const newPatient = { id: crypto.randomUUID(), records: [newRecord] }
-    patients.push(newPatient)
-  }
-  localStorage.setItem('patients', JSON.stringify(patients))
-  $q.notify({
-    color: 'positive',
-    textColor: 'white',
-    icon: 'check_circle',
-    message: 'Ficha del paciente guardada correctamente'
+
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]')
+    if (patientId.value) {
+      const patient = patients.find(p => p.id === patientId.value)
+      if (patient) {
+        if (recordId.value && mode.value === 'edit') {
+          const idx = patient.records.findIndex(r => r.id === recordId.value)
+          if (idx !== -1) {
+            patient.records[idx] = { id: recordId.value, ...JSON.parse(JSON.stringify(formData.value)) }
+          }
+        } else {
+          patient.records.push({ id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) })
+        }
+      }
+    } else {
+      const newRecord = { id: crypto.randomUUID(), ...JSON.parse(JSON.stringify(formData.value)) }
+      const newPatient = { id: crypto.randomUUID(), records: [newRecord] }
+      patients.push(newPatient)
+    }
+    localStorage.setItem('patients', JSON.stringify(patients))
+    $q.notify({
+      color: 'positive',
+      textColor: 'white',
+      icon: 'check_circle',
+      message: 'Ficha del paciente guardada correctamente'
+    })
+    if (patientId.value) {
+      router.push({ path: '/historial', query: { id: patientId.value } })
+    } else {
+      router.push('/pacientes')
+    }
   })
-  if (patientId.value) {
-    router.push({ path: '/historial', query: { id: patientId.value } })
-  } else {
-    router.push('/pacientes')
-  }
 }
 
 </script>

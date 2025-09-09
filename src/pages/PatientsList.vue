@@ -46,7 +46,7 @@ const $q = useQuasar()
 const patients = ref([])
 
 const columns = [
-  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 20%' },
+  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'center', style: 'width: 20%' },
   { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 13%' },
   { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 15%' },
   { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'center', style: 'width: 13%' },
