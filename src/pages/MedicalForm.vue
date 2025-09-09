@@ -522,32 +522,60 @@ const fotoenvejecimientoOptions = [
 const uploadImage = async (file) => {
   const data = new FormData();
   data.append('image', file);
-  const res = await fetch('http://localhost:3000/upload', {
-    method: 'POST',
-    body: data
-  });
-  const json = await res.json();
-  return json.path;
+  try {
+    const res = await fetch('http://localhost:3000/upload', {
+      method: 'POST',
+      body: data
+    });
+    if (!res.ok) {
+      $q.notify({
+        color: 'negative',
+        textColor: 'white',
+        icon: 'error',
+        message: 'Error al subir la imagen'
+      });
+      return null;
+    }
+    const json = await res.json();
+    return json.path;
+  } catch (e) {
+    $q.notify({
+      color: 'negative',
+      textColor: 'white',
+      icon: 'error',
+      message: 'Error al subir la imagen'
+    });
+    return null;
+  }
 };
 
 watch(() => formData.value.firmas.pacienteFile, async (file) => {
   if (file) {
-    formData.value.firmas.paciente = await uploadImage(file);
-    formData.value.firmas.pacienteFile = null;
+    const url = await uploadImage(file);
+    if (url) {
+      formData.value.firmas.paciente = url;
+      formData.value.firmas.pacienteFile = null;
+    }
   }
 });
 
 watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
   if (file) {
-    formData.value.cleopatra.fotoAntes = await uploadImage(file);
-    formData.value.cleopatra.fotoAntesFile = null;
+    const url = await uploadImage(file);
+    if (url) {
+      formData.value.cleopatra.fotoAntes = url;
+      formData.value.cleopatra.fotoAntesFile = null;
+    }
   }
 });
 
 watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
   if (file) {
-    formData.value.cleopatra.fotoDespues = await uploadImage(file);
-    formData.value.cleopatra.fotoDespuesFile = null;
+    const url = await uploadImage(file);
+    if (url) {
+      formData.value.cleopatra.fotoDespues = url;
+      formData.value.cleopatra.fotoDespuesFile = null;
+    }
   }
 });
 
@@ -555,12 +583,18 @@ watch(() => formData.value.evaluacionCorporal.analisisInBodyFiles, async (files)
   if (files && files.length) {
     const paths = [];
     for (const f of Array.from(files)) {
-      paths.push(await uploadImage(f));
+      const path = await uploadImage(f);
+      if (path) {
+        paths.push(path);
+      }
     }
-    formData.value.evaluacionCorporal.analisisInBody = paths;
-    formData.value.evaluacionCorporal.analisisInBodyFiles = [];
+    if (paths.length === files.length) {
+      formData.value.evaluacionCorporal.analisisInBody = paths;
+      formData.value.evaluacionCorporal.analisisInBodyFiles = [];
+    }
   }
 });
+
 
 const onSubmit = () => {
   const patients = JSON.parse(localStorage.getItem('patients') || '[]')
