@@ -5,12 +5,18 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 import fs from 'fs';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
+
+const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.VITE_API_BASE_URL || `http://localhost:${PORT}`;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -36,7 +42,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
             .jpeg({ quality: 80 })
             .toFile(filepath);
 
-        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+        const imageUrl = `${BASE_URL}/uploads/${filename}`;
         res.json({ path: imageUrl });
     } catch (err) {
         console.error(err);
@@ -44,7 +50,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
