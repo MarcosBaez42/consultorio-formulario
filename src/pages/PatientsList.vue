@@ -11,23 +11,24 @@
     <div class="text-h5 q-mb-md">Pacientes Registrados</div>
     <q-table :rows="patients" :columns="columns" row-key="id" class="full-width">
       <template v-slot:body-cell-actions="props">
-        <q-btn
-          color="primary"
-          flat
-          round
-          dense
-          icon="visibility"
-          @click="viewPatient(props.row)"
-        />
-        <q-btn
-          color="negative"
-          flat
-          round
-          dense
-          icon="delete"
-          class="q-ml-sm"
-          @click="confirmDelete(props.row.id)"
-        />
+        <div class="row justify-center no-wrap">
+          <q-btn
+            color="primary"
+            round
+            dense
+            icon="visibility"
+            class="table-action-btn"
+            @click="viewPatient(props.row)"
+          />
+          <q-btn
+            color="negative"
+            round
+            dense
+            icon="delete"
+            class="table-action-btn q-ml-sm"
+            @click="confirmDelete(props.row.id)"
+          />
+        </div>
       </template>
     </q-table>
   </q-page>

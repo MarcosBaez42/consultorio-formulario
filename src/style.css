@@ -53,3 +53,13 @@ body {
   max-width: 1200px;
   margin: 0 auto;
 }
+
+/* Botones de acción en tablas */
+.table-action-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.table-action-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

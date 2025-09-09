@@ -14,14 +14,24 @@
         <q-btn color="primary" flat label="Nuevo registro" @click="newRecord" />
       </template>
       <template v-slot:body-cell-actions="props">
-        <q-btn color="secondary" flat icon="edit" @click="editRecord(props.row)" />
-        <q-btn
-          color="negative"
-          flat
-          icon="delete"
-          class="q-ml-sm"
-          @click="confirmDelete(props.row.id)"
-        />
+        <div class="row justify-center no-wrap">
+          <q-btn
+            color="secondary"
+            round
+            dense
+            icon="edit"
+            class="table-action-btn"
+            @click="editRecord(props.row)"
+          />
+          <q-btn
+            color="negative"
+            round
+            dense
+            icon="delete"
+            class="table-action-btn q-ml-sm"
+            @click="confirmDelete(props.row.id)"
+          />
+        </div>
       </template>
     </q-table>
   </q-page>
