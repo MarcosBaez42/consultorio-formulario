@@ -249,21 +249,31 @@
               <q-input outlined v-model="formData.cleopatra.arrugas" label="Detección de arrugas finas y profundas" />
               <q-input outlined v-model="formData.cleopatra.evaluacionZonas"
                 label="Evaluación por zonas: frente / mejillas / mentón / nariz" />
-              <q-file outlined v-model="formData.cleopatra.fotoAntesFile" label="Foto comparativa (Antes)"
-                class="col-12 col-md-6" accept="image/*" />
-              <q-img v-if="formData.cleopatra.fotoAntes" :src="formData.cleopatra.fotoAntes" alt="Foto Antes"
-                class="q-mt-sm cursor-pointer" style="max-width: 100%; max-height: 100px;"
-                @click="openViewer({ url: formData.cleopatra.fotoAntes, name: formData.cleopatra.fotoAntesName || 'Foto Antes' })" />
-              <div v-if="formData.cleopatra.fotoAntesName" class="text-caption q-mt-xs">
-                {{ formData.cleopatra.fotoAntesName }}
+              <q-file outlined v-model="formData.cleopatra.fotoAntesFiles" label="Foto comparativa (Antes)"
+                multiple counter accept="image/*">
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
+              <div class="row q-col-gutter-sm q-mt-sm">
+                <div v-for="(img, idx) in formData.cleopatra.fotoAntes" :key="idx" class="col-6 col-md-3 text-center">
+                  <q-img :src="img.url" alt="Foto Antes" style="max-width: 100%; max-height: 100px;"
+                    @click="openViewer(img)" class="cursor-pointer" />
+                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
+                </div>
               </div>
-              <q-file outlined v-model="formData.cleopatra.fotoDespuesFile" label="Foto comparativa (Después)"
-                class="col-12 col-md-6" accept="image/*" />
-              <q-img v-if="formData.cleopatra.fotoDespues" :src="formData.cleopatra.fotoDespues" alt="Foto Después"
-                class="q-mt-sm cursor-pointer" style="max-width: 100%; max-height: 100px;"
-                @click="openViewer({ url: formData.cleopatra.fotoDespues, name: formData.cleopatra.fotoDespuesName || 'Foto Después' })" />
-              <div v-if="formData.cleopatra.fotoDespuesName" class="text-caption q-mt-xs">
-                {{ formData.cleopatra.fotoDespuesName }}
+              <q-file outlined v-model="formData.cleopatra.fotoDespuesFiles" label="Foto comparativa (Después)"
+                multiple counter accept="image/*" class="q-mt-md">
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
+              <div class="row q-col-gutter-sm q-mt-sm">
+                <div v-for="(img, idx) in formData.cleopatra.fotoDespues" :key="idx" class="col-6 col-md-3 text-center">
+                  <q-img :src="img.url" alt="Foto Después" style="max-width: 100%; max-height: 100px;"
+                    @click="openViewer(img)" class="cursor-pointer" />
+                  <div class="text-caption q-mt-xs">{{ img.name }}</div>
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -304,7 +314,6 @@
                   <q-file v-model="formData.firmas.pacienteFile" label="Subir firma del paciente" outlined
                     accept="image/*">
                     <template v-slot:prepend>
-                      <q-icon name="signature" />
                     </template>
                   </q-file>
                   <q-img v-if="formData.firmas.paciente" :src="formData.firmas.paciente" alt="Firma del paciente"
@@ -477,12 +486,10 @@ const formData = ref({
     arrugas: '',
     poros: '',
     evaluacionZonas: '',
-    fotoAntes: null,
-    fotoDespues: null,
-    fotoAntesFile: null,
-    fotoDespuesFile: null,
-    fotoAntesName: '',
-    fotoDespuesName: '',
+    fotoAntes: [], // array of { url, name }
+    fotoDespues: [],
+    fotoAntesFiles: [],
+    fotoDespuesFiles: [],
   },
 
   // Diagnóstico y Plan
@@ -528,8 +535,15 @@ onMounted(() => {
       }
       if (record) {
         formData.value = JSON.parse(JSON.stringify(record))
-        formData.value.cleopatra.fotoAntesName = extractFileName(formData.value.cleopatra.fotoAntes)
-        formData.value.cleopatra.fotoDespuesName = extractFileName(formData.value.cleopatra.fotoDespues)
+        if (formData.value.cleopatra) {
+          const cleo = formData.value.cleopatra
+          if (!Array.isArray(cleo.fotoAntes)) {
+            cleo.fotoAntes = cleo.fotoAntes ? [{ url: cleo.fotoAntes, name: extractFileName(cleo.fotoAntes) }] : []
+          }
+          if (!Array.isArray(cleo.fotoDespues)) {
+            cleo.fotoDespues = cleo.fotoDespues ? [{ url: cleo.fotoDespues, name: extractFileName(cleo.fotoDespues) }] : []
+          }
+        }
         formData.value.firmas.pacienteName = extractFileName(formData.value.firmas.paciente)
         formData.value.firmas.tratanteName = formData.value.firmas.tratanteName || extractFileName(formData.value.firmas.tratante)
       }
@@ -618,35 +632,27 @@ watch(() => formData.value.firmas.pacienteFile, async (file) => {
   }
 });
 
-watch(() => formData.value.cleopatra.fotoAntesFile, async (file) => {
-  if (file) {
-    formData.value.cleopatra.fotoAntesName = file.name;
-    const previewUrl = URL.createObjectURL(file);
-    formData.value.cleopatra.fotoAntes = previewUrl;
-    const url = await uploadImage(file);
-    URL.revokeObjectURL(previewUrl);
-    if (url) {
-      formData.value.cleopatra.fotoAntes = url;
-    } else {
-      formData.value.cleopatra.fotoAntes = null;
+watch(() => formData.value.cleopatra.fotoAntesFiles, async (files) => {
+  if (files && files.length) {
+    for (const f of Array.from(files)) {
+      const url = await uploadImage(f);
+      if (url) {
+        formData.value.cleopatra.fotoAntes.push({ url, name: f.name });
+      }
     }
-    formData.value.cleopatra.fotoAntesFile = null;
+    formData.value.cleopatra.fotoAntesFiles = [];
   }
 });
 
-watch(() => formData.value.cleopatra.fotoDespuesFile, async (file) => {
-  if (file) {
-    formData.value.cleopatra.fotoDespuesName = file.name;
-    const previewUrl = URL.createObjectURL(file);
-    formData.value.cleopatra.fotoDespues = previewUrl;
-    const url = await uploadImage(file);
-    URL.revokeObjectURL(previewUrl);
-    if (url) {
-      formData.value.cleopatra.fotoDespues = url;
-    } else {
-      formData.value.cleopatra.fotoDespues = null;
+watch(() => formData.value.cleopatra.fotoDespuesFiles, async (files) => {
+  if (files && files.length) {
+    for (const f of Array.from(files)) {
+      const url = await uploadImage(f);
+      if (url) {
+        formData.value.cleopatra.fotoDespues.push({ url, name: f.name });
+      }
     }
-    formData.value.cleopatra.fotoDespuesFile = null;
+    formData.value.cleopatra.fotoDespuesFiles = [];
   }
 });
 
