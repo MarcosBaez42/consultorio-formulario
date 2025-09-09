@@ -45,10 +45,13 @@ const $q = useQuasar()
 const patients = ref([])
 
 const columns = [
-  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 25%' },
-  { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 30%' },
-  { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 30%' },
-  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center', style: 'width: 15%' }
+  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left', style: 'width: 20%' },
+  { name: 'edad', label: 'Edad', field: 'edad', align: 'center', style: 'width: 13%' },
+  { name: 'documento', label: 'Documento', field: 'documento', align: 'center', style: 'width: 15%' },
+  { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'center', style: 'width: 13%' },
+  { name: 'email', label: 'Email', field: 'email', align: 'center', style: 'width: 13%' },
+  { name: 'fechaConsulta', label: 'Fecha Consulta', field: 'fechaConsulta', align: 'center', style: 'width: 13%' },
+  { name: 'actions', label: 'Opciones', field: 'actions', align: 'center',}
 ]
 
 onMounted(() => {
@@ -61,6 +64,9 @@ onMounted(() => {
       nombreCompleto: latest.nombreCompleto,
       edad: latest.edad,
       documento: latest.documento,
+      telefono: latest.telefono,
+      email: latest.email,
+      fechaConsulta: latest.fechaConsulta,
       records
     }
   })
